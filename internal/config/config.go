@@ -7,14 +7,19 @@ import (
 )
 
 type Config struct {
-	Host           string    `mapstructure:"host" yaml:"host"`
-	Port           int       `mapstructure:"port" yaml:"port"`
-	LogLevel       string    `mapstructure:"log_level" yaml:"log_level"`
-	HostKey        string    `mapstructure:"host_key" yaml:"host_key"`
-	AuthorizedKeys []string  `mapstructure:"authorized_keys" yaml:"authorized_keys"`
-	Posix          *Posix    `mapstructure:"posix" yaml:"posix"`
-	InMemory       *InMemory `mapstructure:"in_memory" yaml:"in_memory"`
-	S3             *S3       `mapstructure:"s3" yaml:"s3"`
+	Host           string   `mapstructure:"host" yaml:"host"`
+	Port           int      `mapstructure:"port" yaml:"port"`
+	LogLevel       string   `mapstructure:"log_level" yaml:"log_level"`
+	HostKey        string   `mapstructure:"host_key" yaml:"host_key"`
+	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
+
+	Storage Storage `mapstructure:"storage" yaml:"storage"`
+}
+
+type Storage struct {
+	Posix    *Posix    `mapstructure:"posix" yaml:"posix"`
+	InMemory *InMemory `mapstructure:"in_memory" yaml:"in_memory"`
+	S3       *S3       `mapstructure:"s3" yaml:"s3"`
 }
 
 type Posix struct {

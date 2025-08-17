@@ -17,7 +17,6 @@ import (
 	internalsftp "github.com/cmp0st/byte/internal/sftp"
 	"github.com/cmp0st/byte/internal/storage"
 	"github.com/pkg/sftp"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -88,32 +87,10 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	slog.Info("Configuration loaded successfully")
 
-	var fs afero.Fs
-	switch {
-	case conf.InMemory != nil:
-		fs = storage.NewInMemory()
-		slog.Info("Storage backend initialized", "type", "in-memory")
-	case conf.Posix != nil:
-		fs = storage.NewPosix(conf.Posix.Root)
-		slog.Info("Storage backend initialized", "type", "posix", "root", conf.Posix.Root)
-	case conf.S3 != nil:
-		s3Fs, err := storage.NewS3(storage.S3Config{
-			Bucket:    conf.S3.Bucket,
-			Region:    conf.S3.Region,
-			Endpoint:  conf.S3.Endpoint,
-			AccessKey: conf.S3.AccessKey,
-			SecretKey: conf.S3.SecretKey,
-			UseSSL:    conf.S3.UseSSL,
-		})
-		if err != nil {
-			slog.Error("Failed to create S3 filesystem", "error", err, "bucket", conf.S3.Bucket, "region", conf.S3.Region)
-			return fmt.Errorf("failed to create S3 filesystem: %w", err)
-		}
-		fs = s3Fs
-		slog.Info("Storage backend initialized", "type", "s3", "bucket", conf.S3.Bucket, "region", conf.S3.Region)
-	default:
-		slog.Error("No storage backend configured")
-		return errors.New("no storage configured")
+	store, err := storage.NewFromConfig(conf.Storage)
+	if err != nil {
+		slog.Error("failed to load storage backend", "err", err)
+		return err
 	}
 
 	s, err := wish.NewServer(
@@ -128,7 +105,7 @@ func serve(cmd *cobra.Command, args []string) error {
 
 			slog.Info("SFTP session started", "user", user, "remote_addr", remoteAddr)
 
-			s := internalsftp.NewServer(fs)
+			s := internalsftp.NewServer(store)
 			handlers := sftp.Handlers{
 				FileGet:  s,
 				FilePut:  s,
