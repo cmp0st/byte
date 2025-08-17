@@ -1,13 +1,15 @@
 package main
 
 import (
-	"log"
+	"log/slog"
+	"os"
 
 	"github.com/cmp0st/byte/internal/cli"
 )
 
 func main() {
 	if err := cli.New().Execute(); err != nil {
-		log.Fatalln(err)
+		slog.Error("Application failed", "error", err)
+		os.Exit(1)
 	}
 }

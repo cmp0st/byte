@@ -13,6 +13,7 @@ type Config struct {
 	AuthorizedKeys []string  `mapstructure:"authorized_keys" yaml:"authorized_keys"`
 	Posix          *Posix    `mapstructure:"posix" yaml:"posix"`
 	InMemory       *InMemory `mapstructure:"in_memory" yaml:"in_memory"`
+	S3             *S3       `mapstructure:"s3" yaml:"s3"`
 }
 
 type Posix struct {
@@ -20,6 +21,15 @@ type Posix struct {
 }
 
 type InMemory struct{}
+
+type S3 struct {
+	Bucket    string `mapstructure:"bucket" yaml:"bucket"`
+	Region    string `mapstructure:"region" yaml:"region"`
+	Endpoint  string `mapstructure:"endpoint" yaml:"endpoint"`
+	AccessKey string `mapstructure:"access_key" yaml:"access_key"`
+	SecretKey string `mapstructure:"secret_key" yaml:"secret_key"`
+	UseSSL    *bool  `mapstructure:"use_ssl" yaml:"use_ssl"`
+}
 
 func Load() (*Config, error) {
 	v := viper.New()
