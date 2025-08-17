@@ -1,0 +1,111 @@
+/* Byte Design System - Dark Terminal Theme */
+
+:root {
+  /* Primary color palette - RGB values for transparency support */
+  --color-interactive-primary: 34, 197, 94;    /* green-500 */
+  --color-interactive-primary-hover: 22, 163, 74; /* green-600 */
+  --color-interactive-secondary: 59, 130, 246; /* blue-500 */
+  --color-interactive-danger: 239, 68, 68;     /* red-500 */
+
+  /* Background colors */
+  --color-bg-primary: 17, 24, 39;      /* gray-900 */
+  --color-bg-secondary: 31, 41, 55;    /* gray-800 */
+  --color-bg-tertiary: 55, 65, 81;     /* gray-700 */
+  --color-bg-quaternary: 75, 85, 99;   /* gray-600 */
+
+  /* Text colors */
+  --color-text-primary: 243, 244, 246;    /* gray-100 */
+  --color-text-secondary: 209, 213, 219;  /* gray-300 */
+  --color-text-muted: 156, 163, 175;      /* gray-400 */
+  --color-text-disabled: 107, 114, 128;   /* gray-500 */
+
+  /* Border colors */
+  --color-border-primary: 55, 65, 81;     /* gray-700 */
+  --color-border-secondary: 75, 85, 99;   /* gray-600 */
+  --color-border-tertiary: 107, 114, 128; /* gray-500 */
+
+  /* Status colors */
+  --color-status-online: 34, 197, 94;     /* green-500 */
+  --color-status-warning: 245, 158, 11;   /* amber-500 */
+  --color-status-error: 239, 68, 68;      /* red-500 */
+  --color-status-info: 59, 130, 246;      /* blue-500 */
+
+  /* Context-specific colors */
+  --color-context-photo: 168, 85, 247;    /* purple-500 */
+  --color-context-git: 249, 115, 22;      /* orange-500 */
+  --color-context-website: 59, 130, 246;  /* blue-500 */
+  --color-context-terminal: 34, 197, 94;  /* green-500 */
+
+  /* Convert to actual color values for use */
+  --color-interactive-primary-rgb: rgb(var(--color-interactive-primary));
+  --color-interactive-primary-hover-rgb: rgb(var(--color-interactive-primary-hover));
+  --color-interactive-secondary-rgb: rgb(var(--color-interactive-secondary));
+  --color-interactive-danger-rgb: rgb(var(--color-interactive-danger));
+
+  --color-bg-primary-rgb: rgb(var(--color-bg-primary));
+  --color-bg-secondary-rgb: rgb(var(--color-bg-secondary));
+  --color-bg-tertiary-rgb: rgb(var(--color-bg-tertiary));
+  --color-bg-quaternary-rgb: rgb(var(--color-bg-quaternary));
+
+  --color-text-primary-rgb: rgb(var(--color-text-primary));
+  --color-text-secondary-rgb: rgb(var(--color-text-secondary));
+  --color-text-muted-rgb: rgb(var(--color-text-muted));
+  --color-text-disabled-rgb: rgb(var(--color-text-disabled));
+
+  --color-border-primary-rgb: rgb(var(--color-border-primary));
+  --color-border-secondary-rgb: rgb(var(--color-border-secondary));
+  --color-border-tertiary-rgb: rgb(var(--color-border-tertiary));
+
+  --color-status-online-rgb: rgb(var(--color-status-online));
+  --color-status-warning-rgb: rgb(var(--color-status-warning));
+  --color-status-error-rgb: rgb(var(--color-status-error));
+  --color-status-info-rgb: rgb(var(--color-status-info));
+
+  --color-context-photo-rgb: rgb(var(--color-context-photo));
+  --color-context-git-rgb: rgb(var(--color-context-git));
+  --color-context-website-rgb: rgb(var(--color-context-website));
+  --color-context-terminal-rgb: rgb(var(--color-context-terminal));
+}
+
+/* Pulse animation for status indicators */
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+  }
+  50% { 
+    opacity: 0.5; 
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% { 
+    opacity: 1; 
+  }
+  50% { 
+    opacity: 0.5; 
+  }
+}
+
+/* Terminal-specific styling */
+.terminal-theme {
+  background-color: var(--color-bg-primary-rgb);
+  color: var(--color-text-primary-rgb);
+  font-family: var(--font-mono);
+}
+
+/* Context-specific theme variations */
+.context-photo {
+  --color-interactive-primary: var(--color-context-photo);
+}
+
+.context-git {
+  --color-interactive-primary: var(--color-context-git);
+}
+
+.context-website {
+  --color-interactive-primary: var(--color-context-website);
+}
+
+.context-terminal {
+  --color-interactive-primary: var(--color-context-terminal);
+}

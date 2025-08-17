@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byte Component Library - Showcase</title>
+    
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Design System Styles -->
+    <link rel="stylesheet" href="../styles/tokens/core.css">
+    <link rel="stylesheet" href="../styles/tokens/semantic.css">
+    <link rel="stylesheet" href="../styles/themes/dark-terminal.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-bg-primary-rgb);
+            color: var(--color-text-primary-rgb);
+            font-family: var(--font-mono);
+            line-height: var(--leading-normal);
+        }
+        
+        .showcase {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-6);
+        }
+        
+        .showcase__header {
+            text-align: center;
+            margin-bottom: var(--space-12);
+            padding-bottom: var(--space-6);
+            border-bottom: var(--border-1) solid var(--color-border-primary-rgb);
+        }
+        
+        .showcase__title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-weight-bold);
+            color: rgb(var(--color-interactive-primary));
+            margin: 0 0 var(--space-4) 0;
+        }
+        
+        .showcase__subtitle {
+            font-size: var(--text-lg);
+            color: var(--color-text-secondary-rgb);
+            margin: 0;
+        }
+        
+        .section {
+            margin-bottom: var(--space-12);
+        }
+        
+        .section__title {
+            font-size: var(--text-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-text-primary-rgb);
+            margin: 0 0 var(--space-6) 0;
+            padding-bottom: var(--space-2);
+            border-bottom: var(--border-1) solid var(--color-border-primary-rgb);
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+        
+        .component-demo {
+            background-color: var(--color-bg-secondary-rgb);
+            border: var(--border-1) solid var(--color-border-primary-rgb);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+        }
+        
+        .component-demo__title {
+            font-size: var(--text-base);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text-primary-rgb);
+            margin: 0 0 var(--space-4) 0;
+        }
+        
+        .component-demo__content {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+        
+        .demo-controls {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+        
+        .file-browser-demo {
+            grid-column: 1 / -1;
+        }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--color-bg-secondary-rgb);
+            border-top: var(--border-1) solid var(--color-border-primary-rgb);
+            padding: var(--space-2) var(--space-4);
+            font-size: var(--text-xs);
+            color: var(--color-text-muted-rgb);
+            z-index: var(--z-fixed);
+        }
+        
+        .pulse-green {
+            animation: pulse-green 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="showcase">
+        <header class="showcase__header">
+            <h1 class="showcase__title">
+                <i class="fas fa-terminal"></i>
+                Byte Component Library
+            </h1>
+            <p class="showcase__subtitle">Web Components for Terminal-First File Server Interfaces</p>
+        </header>
+
+        <!-- Foundation Components -->
+        <section class="section">
+            <h2 class="section__title">Foundation Components</h2>
+            
+            <div class="component-grid">
+                <!-- Buttons -->
+                <div class="component-demo">
+                    <h3 class="component-demo__title">Buttons</h3>
+                    <div class="component-demo__content">
+                        <div class="demo-controls">
+                            <byte-button variant="primary">Primary</byte-button>
+                            <byte-button variant="secondary">Secondary</byte-button>
+                            <byte-button variant="ghost">Ghost</byte-button>
+                            <byte-button variant="danger">Danger</byte-button>
+                        </div>
+                        <div class="demo-controls">
+                            <byte-button variant="primary" icon="download">Download</byte-button>
+                            <byte-button variant="secondary" icon="edit">Edit</byte-button>
+                            <byte-button variant="ghost" icon="settings"></byte-button>
+                        </div>
+                        <div class="demo-controls">
+                            <byte-button variant="primary" size="sm">Small</byte-button>
+                            <byte-button variant="primary" size="base">Base</byte-button>
+                            <byte-button variant="primary" size="lg">Large</byte-button>
+                        </div>
+                        <div class="demo-controls">
+                            <byte-button variant="primary" disabled>Disabled</byte-button>
+                            <byte-button variant="primary" loading>Loading</byte-button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inputs -->
+                <div class="component-demo">
+                    <h3 class="component-demo__title">Inputs</h3>
+                    <div class="component-demo__content">
+                        <byte-input label="File Name" placeholder="Enter filename..." icon="file"></byte-input>
+                        <byte-input label="Search" placeholder="Search files..." icon="search" value="test.js"></byte-input>
+                        <byte-input label="Password" type="password" placeholder="Enter password..." required></byte-input>
+                        <byte-input placeholder="No label input..." help="This input has no label but includes help text"></byte-input>
+                    </div>
+                </div>
+
+                <!-- Cards -->
+                <div class="component-demo">
+                    <h3 class="component-demo__title">Cards</h3>
+                    <div class="component-demo__content">
+                        <byte-card title="Repository Info" icon="folder">
+                            <p>This is a Git repository with 47 commits, 3 branches, and 12 contributors.</p>
+                            <byte-button slot="footer" variant="secondary">Cancel</byte-button>
+                            <byte-button slot="footer" variant="primary">Clone</byte-button>
+                        </byte-card>
+                        
+                        <byte-card>
+                            <p>This card has no header or footer, just content.</p>
+                        </byte-card>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Navigation Components -->
+        <section class="section">
+            <h2 class="section__title">Navigation Components</h2>
+            
+            <div class="component-grid">
+                <!-- Breadcrumb -->
+                <div class="component-demo">
+                    <h3 class="component-demo__title">Breadcrumb</h3>
+                    <div class="component-demo__content">
+                        <byte-breadcrumb path='["projects", "byte", "web"]'></byte-breadcrumb>
+                        <byte-breadcrumb path='["home", "documents"]' prompt=">" command="ls"></byte-breadcrumb>
+                        <byte-breadcrumb path='[]'></byte-breadcrumb>
+                    </div>
+                </div>
+
+                <!-- Context Switcher -->
+                <div class="component-demo">
+                    <h3 class="component-demo__title">Context Switcher</h3>
+                    <div class="component-demo__content">
+                        <byte-context-switcher context-type="git" views='["history", "files", "branches"]' active-view="history"></byte-context-switcher>
+                        <byte-context-switcher context-type="photo" views='["gallery", "list", "slideshow"]' active-view="gallery"></byte-context-switcher>
+                        <byte-context-switcher context-type="website" views='["preview", "files", "console"]' active-view="preview"></byte-context-switcher>
+                        <byte-context-switcher context-type="folder" views='["list"]' active-view="list"></byte-context-switcher>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Context-Specific Components -->
+        <section class="section">
+            <h2 class="section__title">Context-Specific Components</h2>
+            
+            <div class="component-grid">
+                <!-- File Browser -->
+                <div class="component-demo file-browser-demo">
+                    <h3 class="component-demo__title">File Browser</h3>
+                    <div class="component-demo__content">
+                        <byte-file-browser 
+                            title="Project Files"
+                            files='[
+                                {"name": "index.html", "type": "file", "size": 2148, "modified": 1640995200000},
+                                {"name": "style.css", "type": "file", "size": 5432, "modified": 1640995100000},
+                                {"name": "script.js", "type": "file", "size": 1847, "modified": 1640995050000},
+                                {"name": "assets", "type": "directory", "modified": 1640995000000},
+                                {"name": "images", "type": "directory", "modified": 1640994900000},
+                                {"name": "README.md", "type": "file", "size": 924, "modified": 1640994800000},
+                                {"name": ".gitignore", "type": "file", "size": 156, "modified": 1640994700000},
+                                {"name": "package.json", "type": "file", "size": 678, "modified": 1640994600000}
+                            ]'
+                            sort-by="name"
+                            sort-order="asc">
+                        </byte-file-browser>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Components -->
+        <section class="section">
+            <h2 class="section__title">Interactive Components</h2>
+            
+            <div class="component-grid">
+                <!-- Modal -->
+                <div class="component-demo">
+                    <h3 class="component-demo__title">Modal</h3>
+                    <div class="component-demo__content">
+                        <div class="demo-controls">
+                            <byte-button variant="primary" onclick="openModal('demo-modal-sm')">Small Modal</byte-button>
+                            <byte-button variant="secondary" onclick="openModal('demo-modal-md')">Medium Modal</byte-button>
+                            <byte-button variant="ghost" onclick="openModal('demo-modal-lg')">Large Modal</byte-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modals -->
+    <byte-modal id="demo-modal-sm" title="Upload Files" size="sm">
+        <p>Select files to upload to the current directory.</p>
+        <byte-input label="Destination" placeholder="/projects/byte/uploads/" icon="folder"></byte-input>
+        <byte-button slot="footer" variant="secondary" onclick="closeModal('demo-modal-sm')">Cancel</byte-button>
+        <byte-button slot="footer" variant="primary" onclick="closeModal('demo-modal-sm')">Upload</byte-button>
+    </byte-modal>
+
+    <byte-modal id="demo-modal-md" title="File Properties" size="md">
+        <div style="display: grid; gap: 1rem;">
+            <byte-input label="Name" value="example.txt" icon="file"></byte-input>
+            <byte-input label="Path" value="/projects/byte/web/demos/" icon="folder" disabled></byte-input>
+            <byte-input label="Size" value="2.1 KB" disabled></byte-input>
+            <byte-input label="Modified" value="2 hours ago" disabled></byte-input>
+        </div>
+        <byte-button slot="footer" variant="secondary" onclick="closeModal('demo-modal-md')">Cancel</byte-button>
+        <byte-button slot="footer" variant="primary" onclick="closeModal('demo-modal-md')">Save</byte-button>
+    </byte-modal>
+
+    <byte-modal id="demo-modal-lg" title="Terminal Output" size="lg">
+        <div style="background: var(--color-bg-primary-rgb); border-radius: var(--radius-base); padding: var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); color: var(--color-text-primary-rgb);">
+            <div style="color: rgb(var(--color-interactive-primary));">$ npm install</div>
+            <div style="margin: var(--space-2) 0;">Installing dependencies...</div>
+            <div style="color: var(--color-text-muted-rgb);">✓ lodash@4.17.21</div>
+            <div style="color: var(--color-text-muted-rgb);">✓ express@4.18.2</div>
+            <div style="color: var(--color-text-muted-rgb);">✓ dotenv@16.0.3</div>
+            <div style="margin: var(--space-2) 0; color: rgb(var(--color-status-online));">Installation complete!</div>
+        </div>
+        <byte-button slot="footer" variant="primary" onclick="closeModal('demo-modal-lg')">Close</byte-button>
+    </byte-modal>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: var(--space-4);">
+                <span style="display: flex; align-items: center;">
+                    <i class="fas fa-circle pulse-green" style="color: rgb(var(--color-status-online)); margin-right: var(--space-1); font-size: 0.5rem;"></i>
+                    Component showcase active
+                </span>
+                <span>byte://component-library</span>
+            </div>
+            <div style="display: flex; gap: var(--space-4);">
+                <span>8 components loaded</span>
+                <span>last update: just now</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Scripts -->
+    <script src="../components/foundation/byte-button.js"></script>
+    <script src="../components/foundation/byte-input.js"></script>
+    <script src="../components/foundation/byte-card.js"></script>
+    <script src="../components/navigation/byte-breadcrumb.js"></script>
+    <script src="../components/navigation/byte-context-switcher.js"></script>
+    <script src="../components/context/byte-file-browser.js"></script>
+    <script src="../components/interactive/byte-modal.js"></script>
+
+    <script>
+        // Demo functionality
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.open();
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.close();
+            }
+        }
+
+        // Event listeners for component interactions
+        document.addEventListener('byte-click', (e) => {
+            console.log('Button clicked:', e.detail);
+        });
+
+        document.addEventListener('byte-input', (e) => {
+            console.log('Input changed:', e.detail.value);
+        });
+
+        document.addEventListener('byte-navigate', (e) => {
+            console.log('Navigation:', e.detail);
+        });
+
+        document.addEventListener('byte-view-change', (e) => {
+            console.log('View changed:', e.detail);
+        });
+
+        document.addEventListener('byte-file-select', (e) => {
+            console.log('File selected:', e.detail);
+        });
+
+        document.addEventListener('byte-file-open', (e) => {
+            console.log('File opened:', e.detail);
+        });
+
+        document.addEventListener('byte-file-action', (e) => {
+            console.log('File action:', e.detail);
+        });
+
+        document.addEventListener('byte-modal-open', (e) => {
+            console.log('Modal opened:', e.detail);
+        });
+
+        document.addEventListener('byte-modal-close', (e) => {
+            console.log('Modal closed:', e.detail);
+        });
+
+        // Initialize demo
+        console.log('Byte Component Library Demo Loaded');
+        console.log('Open browser console to see component events');
+    </script>
+</body>
+</html>
