@@ -33,7 +33,7 @@ func NewServeCmd() *cobra.Command {
 func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 	keyType := key.Type()
 	keyFingerprint := gossh.FingerprintSHA256(key)
-	
+
 	if len(authorizedKeys) == 0 {
 		slog.Warn("Authentication denied: no authorized keys configured", "key_type", keyType, "fingerprint", keyFingerprint)
 		return false
@@ -65,19 +65,27 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 }
 
 func serve(cmd *cobra.Command, args []string) error {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
-	slog.SetDefault(logger)
-	
-	slog.Info("Starting byte SFTP server")
-	
 	conf, err := config.Load()
 	if err != nil {
-		slog.Error("Failed to load config", "error", err)
 		return fmt.Errorf("Failed to load config: %v", err)
 	}
-	
+
+	var level slog.Level
+	switch conf.LogLevel {
+	case "DEBUG":
+		level = slog.LevelDebug
+	case "INFO":
+		level = slog.LevelInfo
+	case "WARN":
+		level = slog.LevelWarn
+	case "ERROR":
+		level = slog.LevelError
+	}
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+	}))
+	slog.SetDefault(logger)
+
 	slog.Info("Configuration loaded successfully")
 
 	var fs afero.Fs
@@ -117,9 +125,9 @@ func serve(cmd *cobra.Command, args []string) error {
 		wish.WithSubsystem("sftp", func(sess ssh.Session) {
 			remoteAddr := sess.RemoteAddr().String()
 			user := sess.User()
-			
+
 			slog.Info("SFTP session started", "user", user, "remote_addr", remoteAddr)
-			
+
 			s := internalsftp.NewServer(fs)
 			handlers := sftp.Handlers{
 				FileGet:  s,
@@ -143,9 +151,9 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	
+
 	slog.Info("Starting SSH server", "address", fmt.Sprintf("%s:%d", conf.Host, conf.Port))
-	
+
 	go func() {
 		if err = s.ListenAndServe(); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 			slog.Error("Failed to start server", "error", err)
@@ -155,14 +163,14 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	<-done
 	slog.Info("Shutdown signal received, stopping server gracefully")
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer func() { cancel() }()
 	if err := s.Shutdown(ctx); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 		slog.Error("Failed to shutdown server gracefully", "error", err)
 		return fmt.Errorf("failed to shutdown server: %w", err)
 	}
-	
+
 	slog.Info("Server stopped successfully")
 	return nil
 }

@@ -4,7 +4,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"path/filepath"
 
 	"github.com/cmp0st/byte/internal/storage"
 	"github.com/pkg/sftp"
@@ -35,39 +34,40 @@ func (s *Server) Fileread(r *sftp.Request) (io.ReaderAt, error) {
 func (s *Server) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 	slog.Debug("SFTP file write", "method", "Filewrite", "path", r.Filepath, "flags", r.Flags)
 
-	// First try to open the file normally
-	file, err := s.fs.OpenFile(r.Filepath, int(r.Flags), 0644)
-	if err != nil {
-		// If file doesn't exist, try to create parent directories and the file
-		if os.IsNotExist(err) {
-			slog.Debug("File doesn't exist, creating parent directories", "path", r.Filepath)
-
-			// Extract directory from filepath and create it
-			dir := filepath.Dir(r.Filepath)
-			if dir != "" && dir != "." && dir != "/" {
-				if mkdirErr := s.fs.MkdirAll(dir, 0755); mkdirErr != nil {
-					slog.Error("Failed to create parent directories", "dir", dir, "error", mkdirErr)
-				} else {
-					slog.Debug("Created parent directories", "dir", dir)
-				}
-			}
-
-			// Try to create/open the file again with create flag
-			flags := int(r.Flags) | os.O_CREATE
-			file, err = s.fs.OpenFile(r.Filepath, flags, 0644)
-			if err != nil {
-				slog.Error("Failed to create and open file for writing", "path", r.Filepath, "flags", flags, "error", err)
-				return nil, sftpErrFromPathError(err)
-			}
-			slog.Info("File created and opened for writing", "path", r.Filepath, "flags", flags)
+	var flags int
+	pflags := r.Pflags()
+	if pflags.Write {
+		if pflags.Read {
+			flags = os.O_RDWR
 		} else {
-			slog.Error("Failed to open file for writing", "path", r.Filepath, "flags", r.Flags, "error", err)
-			return nil, sftpErrFromPathError(err)
+			flags = os.O_WRONLY
 		}
 	} else {
-		slog.Info("File opened for writing", "path", r.Filepath, "flags", r.Flags)
+		flags = os.O_RDONLY
 	}
 
+	if pflags.Creat {
+		flags |= os.O_CREATE
+	}
+	if pflags.Append {
+		flags |= os.O_APPEND
+	}
+	if pflags.Read {
+		flags |= os.O_RDONLY
+	}
+	if pflags.Trunc {
+		flags |= os.O_TRUNC
+	}
+	if pflags.Excl {
+		flags |= os.O_EXCL
+	}
+
+	// First try to open the file normally
+	file, err := s.fs.OpenFile(r.Filepath, flags, 0644)
+	if err != nil {
+		slog.Error("Failed to open file for writing", "path", r.Filepath, "flags", r.Flags, "error", err)
+		return nil, sftpErrFromPathError(err)
+	}
 	return file, nil
 }
 
