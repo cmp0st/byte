@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byte - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; }
+        .pulse-green { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-blue { animation: pulse-blue 2s infinite; }
+        @keyframes pulse-blue {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-yellow { animation: pulse-yellow 2s infinite; }
+        @keyframes pulse-yellow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-lg font-semibold text-green-400 flex items-center">
+                        <i class="fas fa-terminal mr-2"></i>
+                        byte
+                    </h1>
+                    <nav class="flex space-x-3 ml-8">
+                        <a href="#" class="text-gray-400 hover:text-gray-300 px-2 py-1 text-sm">files</a>
+                        <a href="#" class="text-green-400 border-b border-green-400 px-2 py-1 text-sm">dashboard</a>
+                        <a href="#" class="text-gray-400 hover:text-gray-300 px-2 py-1 text-sm">sessions</a>
+                        <a href="#" class="text-gray-400 hover:text-gray-300 px-2 py-1 text-sm">config</a>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-gray-400">
+                        uptime: <span class="text-green-400">7d 12h</span>
+                    </div>
+                    <div class="text-sm text-gray-300">admin@localhost</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Protocol Status Bar -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="grid grid-cols-4 gap-6 text-center">
+                <div class="flex items-center justify-center space-x-2">
+                    <i class="fas fa-globe text-green-400 pulse-green"></i>
+                    <span class="text-sm text-gray-300">web</span>
+                    <span class="text-xs text-green-400">online</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                    <i class="fas fa-server text-blue-400 pulse-blue"></i>
+                    <span class="text-sm text-gray-300">sftp</span>
+                    <span class="text-xs text-blue-400">3 sessions</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                    <i class="fas fa-terminal text-purple-400"></i>
+                    <span class="text-sm text-gray-300">ssh</span>
+                    <span class="text-xs text-purple-400">2 active</span>
+                </div>
+                <div class="flex items-center justify-center space-x-2">
+                    <i class="fab fa-git-alt text-yellow-400 pulse-yellow"></i>
+                    <span class="text-sm text-gray-300">git</span>
+                    <span class="text-xs text-yellow-400">1 clone</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Context Detection -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-900 rounded flex items-center justify-center">
+                            <i class="fas fa-brain text-green-400 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">context detection</p>
+                        <p class="text-lg font-semibold text-gray-100">active</p>
+                        <p class="text-xs text-green-400">15 folders analyzed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Sync -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-900 rounded flex items-center justify-center">
+                            <i class="fas fa-sync text-blue-400 text-sm pulse-blue"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">real-time sync</p>
+                        <p class="text-lg font-semibold text-gray-100">847ms</p>
+                        <p class="text-xs text-blue-400">avg response time</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Protocols -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-900 rounded flex items-center justify-center">
+                            <i class="fas fa-network-wired text-purple-400 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">protocols</p>
+                        <p class="text-lg font-semibold text-gray-100">4/4</p>
+                        <p class="text-xs text-purple-400">all online</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Usage -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-orange-900 rounded flex items-center justify-center">
+                            <i class="fas fa-hdd text-orange-400 text-sm"></i>
+                        </div>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-xs text-gray-500">storage usage</p>
+                        <p class="text-lg font-semibold text-gray-100">45.2 GB</p>
+                        <div class="w-full bg-gray-700 rounded-full h-1 mt-1">
+                            <div class="bg-orange-400 h-1 rounded-full" style="width: 45%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">of 100 GB</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Context Analysis -->
+            <div class="lg:col-span-2 bg-gray-800 rounded border border-gray-700">
+                <div class="p-4 border-b border-gray-700">
+                    <h3 class="text-sm font-semibold text-gray-100">folder context analysis</h3>
+                    <p class="text-xs text-gray-500">adaptive interface detection</p>
+                </div>
+                <div class="p-4">
+                    <div class="space-y-4">
+                        <!-- Photo Albums -->
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-images text-green-400"></i>
+                                <div>
+                                    <div class="text-sm text-gray-100">photo albums</div>
+                                    <div class="text-xs text-gray-500">3 folders detected</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-green-400">87% images</div>
+                                <div class="text-xs text-gray-500">247 files</div>
+                            </div>
+                        </div>
+
+                        <!-- Git Repositories -->
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div class="flex items-center space-x-3">
+                                <i class="fab fa-git-alt text-orange-400"></i>
+                                <div>
+                                    <div class="text-sm text-gray-100">git repositories</div>
+                                    <div class="text-xs text-gray-500">5 repos detected</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-orange-400">143 commits</div>
+                                <div class="text-xs text-gray-500">12 branches</div>
+                            </div>
+                        </div>
+
+                        <!-- Websites -->
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-globe text-blue-400"></i>
+                                <div>
+                                    <div class="text-sm text-gray-100">websites</div>
+                                    <div class="text-xs text-gray-500">2 sites detected</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-blue-400">html + assets</div>
+                                <div class="text-xs text-gray-500">live preview</div>
+                            </div>
+                        </div>
+
+                        <!-- Regular Folders -->
+                        <div class="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-folder text-gray-400"></i>
+                                <div>
+                                    <div class="text-sm text-gray-100">regular folders</div>
+                                    <div class="text-xs text-gray-500">7 standard folders</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-400">mixed files</div>
+                                <div class="text-xs text-gray-500">list view</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocol Activity -->
+            <div class="bg-gray-800 rounded border border-gray-700">
+                <div class="p-4 border-b border-gray-700">
+                    <h3 class="text-sm font-semibold text-gray-100">protocol activity</h3>
+                    <p class="text-xs text-gray-500">real-time connections</p>
+                </div>
+                <div class="divide-y divide-gray-700">
+                    <!-- Web Sessions -->
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-globe text-green-400 text-sm"></i>
+                                <span class="text-sm text-gray-100">web interface</span>
+                            </div>
+                            <span class="text-xs text-green-400 pulse-green">live</span>
+                        </div>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• user@192.168.1.100 browsing photos</div>
+                            <div>• admin@localhost in dashboard</div>
+                        </div>
+                    </div>
+
+                    <!-- SFTP Sessions -->
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-server text-blue-400 text-sm"></i>
+                                <span class="text-sm text-gray-100">sftp</span>
+                            </div>
+                            <span class="text-xs text-blue-400">3 active</span>
+                        </div>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• dev@10.0.0.5 uploading files</div>
+                            <div>• user@192.168.1.50 downloading</div>
+                            <div>• backup@server syncing</div>
+                        </div>
+                    </div>
+
+                    <!-- SSH Terminal -->
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-terminal text-purple-400 text-sm"></i>
+                                <span class="text-sm text-gray-100">ssh terminal</span>
+                            </div>
+                            <span class="text-xs text-purple-400">2 active</span>
+                        </div>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• dev@localhost in /repos</div>
+                            <div>• admin@localhost system check</div>
+                        </div>
+                    </div>
+
+                    <!-- Git Operations -->
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <i class="fab fa-git-alt text-yellow-400 text-sm"></i>
+                                <span class="text-sm text-gray-100">git ssh</span>
+                            </div>
+                            <span class="text-xs text-yellow-400 pulse-yellow">cloning</span>
+                        </div>
+                        <div class="text-xs text-gray-500 space-y-1">
+                            <div>• dev@remote cloning my-project</div>
+                            <div>• 67% complete (8.2 MB / 12.3 MB)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="mt-8 bg-gray-800 rounded border border-gray-700">
+            <div class="p-4 border-b border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-100">recent activity</h3>
+                <p class="text-xs text-gray-500">cross-protocol file operations</p>
+            </div>
+            <div class="divide-y divide-gray-700">
+                <div class="p-4 flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-green-900 rounded flex items-center justify-center">
+                            <i class="fas fa-images text-green-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-100">
+                            <span class="text-green-400">photo album</span> context detected in 
+                            <span class="font-mono text-gray-300">/photos/vacation-2024</span>
+                        </p>
+                        <p class="text-xs text-gray-500">2 minutes ago • 47 images • web view active</p>
+                    </div>
+                </div>
+
+                <div class="p-4 flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-blue-900 rounded flex items-center justify-center">
+                            <i class="fas fa-upload text-blue-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-100">
+                            <span class="text-blue-400">sftp upload</span> triggered 
+                            <span class="text-green-400">real-time sync</span> to web interface
+                        </p>
+                        <p class="text-xs text-gray-500">5 minutes ago • dev@10.0.0.5 • 3 files synced in 234ms</p>
+                    </div>
+                </div>
+
+                <div class="p-4 flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-orange-900 rounded flex items-center justify-center">
+                            <i class="fab fa-git-alt text-orange-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-100">
+                            <span class="text-orange-400">git push</span> detected in 
+                            <span class="font-mono text-gray-300">/repos/my-project</span>
+                        </p>
+                        <p class="text-xs text-gray-500">12 minutes ago • dev@localhost • commit a3b4c5d • web git view updated</p>
+                    </div>
+                </div>
+
+                <div class="p-4 flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-purple-900 rounded flex items-center justify-center">
+                            <i class="fas fa-terminal text-purple-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-100">
+                            <span class="text-purple-400">ssh session</span> started bubble tea interface
+                        </p>
+                        <p class="text-xs text-gray-500">18 minutes ago • admin@localhost • terminal file browser active</p>
+                    </div>
+                </div>
+
+                <div class="p-4 flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <div class="w-6 h-6 bg-blue-900 rounded flex items-center justify-center">
+                            <i class="fas fa-globe text-blue-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-100">
+                            <span class="text-blue-400">website</span> context activated for 
+                            <span class="font-mono text-gray-300">/sites/portfolio</span>
+                        </p>
+                        <p class="text-xs text-gray-500">25 minutes ago • index.html detected • live preview enabled</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div class="flex items-center justify-between text-xs text-gray-400">
+                <div class="flex items-center space-x-4">
+                    <span class="flex items-center">
+                        <i class="fas fa-circle text-green-400 mr-1 text-xs pulse-green"></i>
+                        byte online
+                    </span>
+                    <span>real-time sync: 847ms avg</span>
+                    <span>protocols: 4/4 active</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span>contexts detected: 17 folders</span>
+                    <span>memory: 245MB / 1GB</span>
+                    <span>uptime: 7d 12h 34m</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byte - Git Repository</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; }
+        .pulse-green { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-lg font-semibold text-green-400 flex items-center">
+                        <i class="fas fa-terminal mr-2"></i>
+                        byte
+                    </h1>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="text-gray-400">protocols:</span>
+                        <span class="text-green-400 pulse-green">web</span>
+                        <span class="text-blue-400">sftp</span>
+                        <span class="text-purple-400">ssh</span>
+                        <span class="text-yellow-400 pulse-green">git</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-gray-400">
+                        sync: <span class="text-green-400">active</span>
+                    </div>
+                    <button class="bg-green-600 hover:bg-green-700 text-gray-900 px-3 py-1 rounded text-sm font-medium">
+                        upload
+                    </button>
+                    <div class="text-sm text-gray-300">dev@localhost</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Path & Context -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-sm">
+                    <span class="text-gray-500">$</span>
+                    <span class="text-gray-300">cd</span>
+                    <nav class="flex items-center space-x-1">
+                        <a href="#" class="text-green-400 hover:text-green-300">/</a>
+                        <span class="text-gray-500">/</span>
+                        <a href="#" class="text-green-400 hover:text-green-300">repos</a>
+                        <span class="text-gray-500">/</span>
+                        <span class="text-gray-100">my-project</span>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4 text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-500">type:</span>
+                        <span class="bg-orange-900 text-orange-300 px-2 py-1 rounded">git repo</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-500">branch:</span>
+                        <span class="text-yellow-400">main</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-500">view:</span>
+                        <button class="text-orange-400 hover:text-orange-300">history</button>
+                        <span class="text-gray-500">|</span>
+                        <button class="text-gray-400 hover:text-gray-300">files</button>
+                        <span class="text-gray-500">|</span>
+                        <button class="text-gray-400 hover:text-gray-300">branches</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Git Info Bar -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <i class="fab fa-git-alt text-orange-400"></i>
+                        <span class="text-gray-300">47 commits</span>
+                        <span class="text-gray-500">•</span>
+                        <span class="text-gray-400">3 branches</span>
+                        <span class="text-gray-500">•</span>
+                        <span class="text-gray-400">last push: 2h ago</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="text-xs text-gray-500">
+                        git clone ssh://dev@localhost:2222/repos/my-project.git
+                    </div>
+                    <button class="text-gray-400 hover:text-gray-300">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Commit History -->
+            <div class="lg:col-span-2 bg-gray-800 rounded border border-gray-700">
+                <div class="border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <i class="fas fa-history text-orange-400"></i>
+                        <span class="text-gray-300">commit history</span>
+                        <span class="text-gray-500">(main)</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-400 hover:text-gray-300 text-xs">
+                            <i class="fas fa-code-branch mr-1"></i>
+                            branches
+                        </button>
+                        <button class="text-gray-400 hover:text-gray-300 text-xs">
+                            <i class="fas fa-tags mr-1"></i>
+                            tags
+                        </button>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-700">
+                    <!-- Commit entries -->
+                    <div class="p-4 hover:bg-gray-700">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-300">feat: add user authentication</div>
+                                    <div class="text-xs text-gray-500">2h ago</div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="font-mono text-yellow-400">a3b4c5d</span>
+                                    <span class="ml-2">by dev@localhost</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    +127 -45 lines • 8 files changed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 hover:bg-gray-700">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-300">fix: resolve login redirect issue</div>
+                                    <div class="text-xs text-gray-500">1 day ago</div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="font-mono text-yellow-400">9f8e7d6</span>
+                                    <span class="ml-2">by dev@localhost</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    +23 -12 lines • 3 files changed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 hover:bg-gray-700">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-2 h-2 bg-purple-400 rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-300">refactor: improve API response handling</div>
+                                    <div class="text-xs text-gray-500">2 days ago</div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="font-mono text-yellow-400">5c4b3a2</span>
+                                    <span class="ml-2">by admin@localhost</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    +89 -156 lines • 12 files changed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 hover:bg-gray-700">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-300">feat: add file upload component</div>
+                                    <div class="text-xs text-gray-500">3 days ago</div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="font-mono text-yellow-400">1a2b3c4</span>
+                                    <span class="ml-2">by dev@localhost</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    +234 -0 lines • 5 files changed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 hover:bg-gray-700">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0 w-2 h-2 bg-red-400 rounded-full mt-2"></div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="text-sm text-gray-300">fix: memory leak in file processor</div>
+                                    <div class="text-xs text-gray-500">1 week ago</div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="font-mono text-yellow-400">8d7c6b5</span>
+                                    <span class="ml-2">by admin@localhost</span>
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">
+                                    +15 -8 lines • 2 files changed
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Repository Info & Files -->
+            <div class="space-y-6">
+                <!-- Repository Status -->
+                <div class="bg-gray-800 rounded border border-gray-700">
+                    <div class="border-b border-gray-700 px-4 py-3">
+                        <div class="flex items-center space-x-2 text-sm">
+                            <i class="fas fa-info-circle text-blue-400"></i>
+                            <span class="text-gray-300">repository info</span>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">current branch</span>
+                            <span class="text-yellow-400 font-mono">main</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">latest commit</span>
+                            <span class="text-gray-300 font-mono">a3b4c5d</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">total commits</span>
+                            <span class="text-gray-300">47</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">contributors</span>
+                            <span class="text-gray-300">2</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">repo size</span>
+                            <span class="text-gray-300">12.3 MB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Files -->
+                <div class="bg-gray-800 rounded border border-gray-700">
+                    <div class="border-b border-gray-700 px-4 py-3">
+                        <div class="flex items-center space-x-2 text-sm">
+                            <i class="fas fa-folder text-yellow-400"></i>
+                            <span class="text-gray-300">recent files</span>
+                        </div>
+                    </div>
+                    <div class="divide-y divide-gray-700">
+                        <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-file-code text-blue-400 text-sm"></i>
+                                <span class="text-gray-300 text-sm">auth.js</span>
+                            </div>
+                            <div class="text-xs text-gray-500">2h ago</div>
+                        </div>
+
+                        <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-file-code text-green-400 text-sm"></i>
+                                <span class="text-gray-300 text-sm">login.vue</span>
+                            </div>
+                            <div class="text-xs text-gray-500">2h ago</div>
+                        </div>
+
+                        <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-file-code text-orange-400 text-sm"></i>
+                                <span class="text-gray-300 text-sm">routes.js</span>
+                            </div>
+                            <div class="text-xs text-gray-500">1 day ago</div>
+                        </div>
+
+                        <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-file-alt text-gray-400 text-sm"></i>
+                                <span class="text-gray-300 text-sm">README.md</span>
+                            </div>
+                            <div class="text-xs text-gray-500">3 days ago</div>
+                        </div>
+
+                        <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-cog text-gray-400 text-sm"></i>
+                                <span class="text-gray-300 text-sm">package.json</span>
+                            </div>
+                            <div class="text-xs text-gray-500">1 week ago</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Git Operations -->
+                <div class="bg-gray-800 rounded border border-gray-700">
+                    <div class="border-b border-gray-700 px-4 py-3">
+                        <div class="flex items-center space-x-2 text-sm">
+                            <i class="fab fa-git-alt text-orange-400"></i>
+                            <span class="text-gray-300">git operations</span>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-2">
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-2 rounded text-sm text-left">
+                            <i class="fas fa-download mr-2"></i>
+                            clone repository
+                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-2 rounded text-sm text-left">
+                            <i class="fas fa-code-branch mr-2"></i>
+                            browse branches
+                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-2 rounded text-sm text-left">
+                            <i class="fas fa-eye mr-2"></i>
+                            view files
+                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-2 rounded text-sm text-left">
+                            <i class="fas fa-terminal mr-2"></i>
+                            ssh terminal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Git Commands Panel -->
+        <div class="mt-8 bg-gray-800 rounded border border-gray-700 p-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 text-sm">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-terminal text-gray-400"></i>
+                        <span class="text-gray-300">git access</span>
+                    </div>
+                    <div class="text-xs text-gray-500 font-mono">
+                        git clone ssh://dev@localhost:2222/repos/my-project.git
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 text-xs">
+                    <button class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded">
+                        <i class="fas fa-copy mr-1"></i>
+                        copy clone url
+                    </button>
+                    <button class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded">
+                        <i class="fas fa-download mr-1"></i>
+                        download zip
+                    </button>
+                    <button class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded">
+                        <i class="fas fa-folder-open mr-1"></i>
+                        open in ssh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div class="flex items-center justify-between text-xs text-gray-400">
+                <div class="flex items-center space-x-4">
+                    <span class="flex items-center">
+                        <i class="fas fa-circle text-green-400 mr-1 text-xs pulse-green"></i>
+                        real-time sync
+                    </span>
+                    <span>detected: git repository (.git found)</span>
+                    <span>branch: main (47 commits)</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span>last push: 2h ago</span>
+                    <span>repo size: 12.3 MB</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byte - File Browser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'JetBrains Mono', monospace; }
+        .pulse-green { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-gray-100">
+    <!-- Header -->
+    <header class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-14">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-lg font-semibold text-green-400 flex items-center">
+                        <i class="fas fa-terminal mr-2"></i>
+                        byte
+                    </h1>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span class="text-gray-400">protocols:</span>
+                        <span class="text-green-400 pulse-green">web</span>
+                        <span class="text-blue-400">sftp</span>
+                        <span class="text-purple-400">ssh</span>
+                        <span class="text-yellow-400">git</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="text-xs text-gray-400">
+                        sync: <span class="text-green-400">active</span>
+                    </div>
+                    <button class="bg-green-600 hover:bg-green-700 text-gray-900 px-3 py-1 rounded text-sm font-medium">
+                        upload
+                    </button>
+                    <div class="text-sm text-gray-300">admin@localhost</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Path & Context -->
+    <div class="bg-gray-800 border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-sm">
+                    <span class="text-gray-500">$</span>
+                    <span class="text-gray-300">cd</span>
+                    <nav class="flex items-center space-x-1">
+                        <a href="#" class="text-green-400 hover:text-green-300">/</a>
+                        <span class="text-gray-500">/</span>
+                        <a href="#" class="text-green-400 hover:text-green-300">projects</a>
+                        <span class="text-gray-500">/</span>
+                        <span class="text-gray-100">portfolio-site</span>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4 text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-500">type:</span>
+                        <span class="bg-blue-900 text-blue-300 px-2 py-1 rounded">website</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-500">view:</span>
+                        <button class="text-blue-400 hover:text-blue-300">preview</button>
+                        <span class="text-gray-500">|</span>
+                        <button class="text-gray-400 hover:text-gray-300">files</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Website Preview -->
+            <div class="lg:col-span-2 bg-gray-800 rounded border border-gray-700">
+                <div class="border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <i class="fas fa-globe text-blue-400"></i>
+                        <span class="text-gray-300">live preview</span>
+                        <span class="text-gray-500">index.html</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-gray-400 hover:text-gray-300 text-xs">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            open
+                        </button>
+                        <button class="text-gray-400 hover:text-gray-300 text-xs">
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="h-96 bg-white m-4 rounded border border-gray-600 overflow-hidden">
+                    <!-- Simulated website preview -->
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-20 flex items-center justify-center">
+                        <h1 class="text-white text-xl font-bold">Portfolio Site</h1>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="bg-gray-100 h-4 rounded w-3/4"></div>
+                        <div class="bg-gray-100 h-4 rounded w-1/2"></div>
+                        <div class="grid grid-cols-3 gap-4 mt-6">
+                            <div class="bg-gray-200 h-24 rounded"></div>
+                            <div class="bg-gray-200 h-24 rounded"></div>
+                            <div class="bg-gray-200 h-24 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Browser -->
+            <div class="bg-gray-800 rounded border border-gray-700">
+                <div class="border-b border-gray-700 px-4 py-2">
+                    <div class="flex items-center space-x-2 text-sm">
+                        <i class="fas fa-folder text-yellow-400"></i>
+                        <span class="text-gray-300">files</span>
+                        <span class="text-gray-500 text-xs">(12 items)</span>
+                    </div>
+                </div>
+                <div class="divide-y divide-gray-700">
+                    <!-- Files -->
+                    <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-code text-blue-400 text-sm"></i>
+                            <span class="text-gray-300 text-sm">index.html</span>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
+                            <span class="text-xs text-gray-500">2.1kb</span>
+                            <button class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-code text-blue-400 text-sm"></i>
+                            <span class="text-gray-300 text-sm">style.css</span>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
+                            <span class="text-xs text-gray-500">5.3kb</span>
+                            <button class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-code text-yellow-400 text-sm"></i>
+                            <span class="text-gray-300 text-sm">script.js</span>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
+                            <span class="text-xs text-gray-500">1.8kb</span>
+                            <button class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-folder text-yellow-400 text-sm"></i>
+                            <span class="text-gray-300 text-sm">assets/</span>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
+                            <span class="text-xs text-gray-500">8 items</span>
+                            <button class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-folder text-yellow-400 text-sm"></i>
+                            <span class="text-gray-300 text-sm">images/</span>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
+                            <span class="text-xs text-gray-500">15 items</span>
+                            <button class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="px-4 py-2 hover:bg-gray-700 flex items-center justify-between cursor-pointer group">
+                        <div class="flex items-center space-x-2">
+                            <i class="fas fa-file-alt text-gray-400 text-sm"></i>
+                            <span class="text-gray-300 text-sm">README.md</span>
+                        </div>
+                        <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
+                            <span class="text-xs text-gray-500">0.9kb</span>
+                            <button class="text-gray-400 hover:text-gray-300">
+                                <i class="fas fa-eye text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Switching Examples -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Photo Album Context -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center space-x-2 mb-3">
+                    <i class="fas fa-images text-green-400"></i>
+                    <span class="text-sm text-gray-300">photo album context</span>
+                </div>
+                <div class="text-xs text-gray-500 mb-2">folders with images show gallery view</div>
+                <div class="grid grid-cols-3 gap-1">
+                    <div class="bg-gray-700 h-12 rounded"></div>
+                    <div class="bg-gray-700 h-12 rounded"></div>
+                    <div class="bg-gray-700 h-12 rounded"></div>
+                </div>
+            </div>
+
+            <!-- Git Repo Context -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center space-x-2 mb-3">
+                    <i class="fab fa-git-alt text-orange-400"></i>
+                    <span class="text-sm text-gray-300">git repo context</span>
+                </div>
+                <div class="text-xs text-gray-500 mb-2">folders with .git show commit history</div>
+                <div class="space-y-1">
+                    <div class="text-xs text-gray-400">abc123 feat: add nav</div>
+                    <div class="text-xs text-gray-400">def456 fix: responsive</div>
+                    <div class="text-xs text-gray-400">ghi789 init commit</div>
+                </div>
+            </div>
+
+            <!-- Regular Folder Context -->
+            <div class="bg-gray-800 rounded border border-gray-700 p-4">
+                <div class="flex items-center space-x-2 mb-3">
+                    <i class="fas fa-folder text-blue-400"></i>
+                    <span class="text-sm text-gray-300">standard context</span>
+                </div>
+                <div class="text-xs text-gray-500 mb-2">regular folders show file list</div>
+                <div class="space-y-1">
+                    <div class="text-xs text-gray-400">📄 document.pdf</div>
+                    <div class="text-xs text-gray-400">📁 subfolder/</div>
+                    <div class="text-xs text-gray-400">📄 notes.txt</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Status Bar -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div class="flex items-center justify-between text-xs text-gray-400">
+                <div class="flex items-center space-x-4">
+                    <span class="flex items-center">
+                        <i class="fas fa-circle text-green-400 mr-1 text-xs pulse-green"></i>
+                        real-time sync
+                    </span>
+                    <span>sftp://localhost:2222</span>
+                    <span>3 active sessions</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span>12 files (24.3kb)</span>
+                    <span>last sync: 2s ago</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
