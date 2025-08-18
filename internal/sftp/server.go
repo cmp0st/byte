@@ -1,177 +1,77 @@
 package sftp
 
 import (
-	"io"
+	"fmt"
 	"log/slog"
-	"os"
+	"strings"
 
-	"github.com/cmp0st/byte/internal/storage"
+	"github.com/charmbracelet/ssh"
+	"github.com/charmbracelet/wish"
+	"github.com/cmp0st/byte/internal/config"
 	"github.com/pkg/sftp"
-	"github.com/spf13/afero"
+	gossh "golang.org/x/crypto/ssh"
 )
 
-type Server struct {
-	fs storage.Interface
-}
+func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
+	keyType := key.Type()
+	keyFingerprint := gossh.FingerprintSHA256(key)
 
-func NewServer(fs storage.Interface) *Server {
-	return &Server{fs: fs}
-}
-
-func (s *Server) Fileread(r *sftp.Request) (io.ReaderAt, error) {
-	slog.Debug("SFTP file read", "method", "Fileread", "path", r.Filepath)
-
-	file, err := s.fs.Open(r.Filepath)
-	if err != nil {
-		slog.Error("Failed to open file for reading", "path", r.Filepath, "error", err)
-		return nil, sftpErrFromPathError(err)
+	if len(authorizedKeys) == 0 {
+		slog.Warn("Authentication denied: no authorized keys configured", "key_type", keyType, "fingerprint", keyFingerprint)
+		return false
 	}
 
-	slog.Info("File opened for reading", "path", r.Filepath)
-	return file, nil
-}
+	keyData := key.Marshal()
 
-func (s *Server) Filewrite(r *sftp.Request) (io.WriterAt, error) {
-	slog.Debug("SFTP file write", "method", "Filewrite", "path", r.Filepath, "flags", r.Flags)
-
-	var flags int
-	pflags := r.Pflags()
-	if pflags.Write {
-		if pflags.Read {
-			flags = os.O_RDWR
-		} else {
-			flags = os.O_WRONLY
+	for i, authKey := range authorizedKeys {
+		parts := strings.Fields(authKey)
+		if len(parts) < 2 {
+			slog.Debug("Skipping malformed authorized key", "index", i)
+			continue
 		}
-	} else {
-		flags = os.O_RDONLY
-	}
 
-	if pflags.Creat {
-		flags |= os.O_CREATE
-	}
-	if pflags.Append {
-		flags |= os.O_APPEND
-	}
-	if pflags.Read {
-		flags |= os.O_RDONLY
-	}
-	if pflags.Trunc {
-		flags |= os.O_TRUNC
-	}
-	if pflags.Excl {
-		flags |= os.O_EXCL
-	}
-
-	// First try to open the file normally
-	file, err := s.fs.OpenFile(r.Filepath, flags, 0644)
-	if err != nil {
-		slog.Error("Failed to open file for writing", "path", r.Filepath, "flags", r.Flags, "error", err)
-		return nil, sftpErrFromPathError(err)
-	}
-	return file, nil
-}
-
-func (s *Server) Filecmd(r *sftp.Request) error {
-	slog.Debug("SFTP file command", "method", r.Method, "path", r.Filepath, "target", r.Target)
-
-	var err error
-	switch r.Method {
-	case "Remove":
-		err = s.fs.Remove(r.Filepath)
+		parsedKey, _, _, _, err := gossh.ParseAuthorizedKey([]byte(authKey))
 		if err != nil {
-			slog.Error("Failed to remove file", "path", r.Filepath, "error", err)
-		} else {
-			slog.Info("File removed", "path", r.Filepath)
+			slog.Debug("Failed to parse authorized key", "index", i, "error", err)
+			continue
 		}
-		return sftpErrFromPathError(err)
-	case "Mkdir":
-		err = s.fs.Mkdir(r.Filepath, 0755)
-		if err != nil {
-			slog.Error("Failed to create directory", "path", r.Filepath, "error", err)
-		} else {
-			slog.Info("Directory created", "path", r.Filepath)
+
+		if parsedKey.Type() == keyType && string(parsedKey.Marshal()) == string(keyData) {
+			slog.Info("Authentication successful", "key_type", keyType, "fingerprint", keyFingerprint)
+			return true
 		}
-		return sftpErrFromPathError(err)
-	case "Rmdir":
-		err = s.fs.Remove(r.Filepath)
-		if err != nil {
-			slog.Error("Failed to remove directory", "path", r.Filepath, "error", err)
-		} else {
-			slog.Info("Directory removed", "path", r.Filepath)
-		}
-		return sftpErrFromPathError(err)
-	case "Rename":
-		err = s.fs.Rename(r.Filepath, r.Target)
-		if err != nil {
-			slog.Error("Failed to rename file", "from", r.Filepath, "to", r.Target, "error", err)
-		} else {
-			slog.Info("File renamed", "from", r.Filepath, "to", r.Target)
-		}
-		return sftpErrFromPathError(err)
-	case "Setstat":
-		slog.Debug("Setstat operation (no-op)", "path", r.Filepath)
-		return nil
-	default:
-		slog.Warn("Unsupported SFTP operation", "method", r.Method, "path", r.Filepath)
-		return sftp.ErrSSHFxOpUnsupported
 	}
+
+	slog.Warn("Authentication denied: key not found in authorized keys", "key_type", keyType, "fingerprint", keyFingerprint)
+	return false
 }
 
-func (s *Server) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
-	slog.Debug("SFTP file list", "method", r.Method, "path", r.Filepath)
+func NewServer(c config.SFTP, h *Handlers) (*ssh.Server, error) {
+	return wish.NewServer(
+		wish.WithAddress(fmt.Sprintf("%s:%d", c.Host, c.Port)),
+		wish.WithHostKeyPEM([]byte(c.HostKey)),
+		wish.WithPublicKeyAuth(func(ctx ssh.Context, key ssh.PublicKey) bool {
+			return isAuthorizedKey(c.AuthorizedKeys, key)
+		}),
+		wish.WithSubsystem("sftp", func(sess ssh.Session) {
+			remoteAddr := sess.RemoteAddr().String()
+			user := sess.User()
 
-	switch r.Method {
-	case "List":
-		entries, err := afero.ReadDir(s.fs, r.Filepath)
-		if err != nil {
-			slog.Error("Failed to list directory", "path", r.Filepath, "error", err)
-			return nil, sftpErrFromPathError(err)
-		}
-		var fileInfos []os.FileInfo
-		for _, entry := range entries {
-			fileInfos = append(fileInfos, entry)
-		}
-		slog.Info("Directory listed", "path", r.Filepath, "entries", len(fileInfos))
-		return listerat(fileInfos), nil
-	case "Stat":
-		info, err := s.fs.Stat(r.Filepath)
-		if err != nil {
-			slog.Error("Failed to stat file", "path", r.Filepath, "error", err)
-			return nil, sftpErrFromPathError(err)
-		}
-		slog.Debug("File stat", "path", r.Filepath, "size", info.Size(), "mode", info.Mode())
-		return listerat([]os.FileInfo{info}), nil
-	case "Readlink":
-		slog.Debug("Readlink operation not supported", "path", r.Filepath)
-		return nil, sftp.ErrSSHFxOpUnsupported
-	default:
-		slog.Warn("Unsupported file list operation", "method", r.Method, "path", r.Filepath)
-		return nil, sftp.ErrSSHFxOpUnsupported
-	}
-}
+			slog.Info("SFTP session started", "user", user, "remote_addr", remoteAddr)
 
-type listerat []os.FileInfo
+			handlers := sftp.Handlers{
+				FileGet:  h,
+				FilePut:  h,
+				FileCmd:  h,
+				FileList: h,
+			}
 
-func (f listerat) ListAt(ls []os.FileInfo, offset int64) (int, error) {
-	if offset >= int64(len(f)) {
-		return 0, io.EOF
-	}
-	n := copy(ls, f[offset:])
-	if n < len(ls) {
-		return n, io.EOF
-	}
-	return n, nil
-}
-
-func sftpErrFromPathError(err error) error {
-	if err == nil {
-		return nil
-	}
-	if os.IsNotExist(err) {
-		return sftp.ErrSSHFxNoSuchFile
-	}
-	if os.IsPermission(err) {
-		return sftp.ErrSSHFxPermissionDenied
-	}
-	return err
+			server := sftp.NewRequestServer(sess, handlers)
+			if err := server.Serve(); err != nil {
+				slog.Error("SFTP server error", "error", err, "user", user, "remote_addr", remoteAddr)
+			} else {
+				slog.Info("SFTP session ended", "user", user, "remote_addr", remoteAddr)
+			}
+		}),
+	)
 }

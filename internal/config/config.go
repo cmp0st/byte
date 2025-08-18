@@ -7,13 +7,18 @@ import (
 )
 
 type Config struct {
-	Host           string   `mapstructure:"host" yaml:"host"`
-	Port           int      `mapstructure:"port" yaml:"port"`
-	LogLevel       string   `mapstructure:"log_level" yaml:"log_level"`
-	HostKey        string   `mapstructure:"host_key" yaml:"host_key"`
-	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
+	LogLevel string `mapstructure:"log_level" yaml:"log_level"`
+
+	SFTP SFTP `mapstructure:"sftp" yaml:"sftp"`
 
 	Storage Storage `mapstructure:"storage" yaml:"storage"`
+}
+
+type SFTP struct {
+	Host           string   `mapstructure:"host" yaml:"host"`
+	Port           int      `mapstructure:"port" yaml:"port"`
+	HostKey        string   `mapstructure:"host_key" yaml:"host_key"`
+	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
 }
 
 type Storage struct {
