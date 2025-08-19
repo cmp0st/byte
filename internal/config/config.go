@@ -10,6 +10,7 @@ type Config struct {
 	LogLevel string `mapstructure:"log_level" yaml:"log_level"`
 
 	SFTP SFTP `mapstructure:"sftp" yaml:"sftp"`
+	HTTP HTTP `mapstructure:"http" yaml:"http"`
 
 	Storage Storage `mapstructure:"storage" yaml:"storage"`
 }
@@ -19,6 +20,11 @@ type SFTP struct {
 	Port           int      `mapstructure:"port" yaml:"port"`
 	HostKey        string   `mapstructure:"host_key" yaml:"host_key"`
 	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
+}
+
+type HTTP struct {
+	Host string `mapstructure:"host" yaml:"host"`
+	Port int    `mapstructure:"port" yaml:"port"`
 }
 
 type Storage struct {
@@ -46,8 +52,10 @@ func Load() (*Config, error) {
 	v := viper.New()
 
 	// Set defaults
-	v.SetDefault("host", "localhost")
-	v.SetDefault("port", 2222)
+	v.SetDefault("sftp.host", "localhost")
+	v.SetDefault("sftp.port", 2222)
+	v.SetDefault("http.host", "localhost")
+	v.SetDefault("http.port", 8080)
 	v.SetDefault("posix.root", "./data")
 
 	// Config file settings

@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+package files.v1;
+
+option go_package = "github.com/cmp0st/byte/gen/files/v1;filesv1";
+
+import "google/protobuf/timestamp.proto";
+
+// FileService provides filesystem operations
+service FileService {
+  // List directory contents
+  rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
+  
+  // Read file content (streaming for large files)
+  rpc ReadFile(ReadFileRequest) returns (stream ReadFileResponse);
+  
+  // Write file content (streaming for large files)
+  rpc WriteFile(stream WriteFileRequest) returns (WriteFileResponse);
+  
+  // Create a directory
+  rpc CreateDirectory(CreateDirectoryRequest) returns (CreateDirectoryResponse);
+  
+  // Delete a file or directory
+  rpc DeletePath(DeletePathRequest) returns (DeletePathResponse);
+  
+  // Move/rename a file or directory
+  rpc MovePath(MovePathRequest) returns (MovePathResponse);
+  
+  // Get file or directory information
+  rpc GetPathInfo(GetPathInfoRequest) returns (GetPathInfoResponse);
+}
+
+// File information
+message FileInfo {
+  // File or directory name (basename)
+  string name = 1;
+  // Full path to the file or directory
+  string path = 2;
+  // Size of the file in bytes (0 for directories)
+  int64 size = 3;
+  // File mode/permissions as Unix mode bits
+  uint32 mode = 4;
+  // Last modification time
+  google.protobuf.Timestamp modified_time = 5;
+  // Whether this is a directory
+  bool is_dir = 6;
+}
+
+// Directory entry for listings
+message DirectoryEntry {
+  // File information for this entry
+  FileInfo file_info = 1;
+}
+
+// Streaming chunk for file content
+message StreamChunk {
+  // Chunk of file data
+  bytes data = 1;
+  // Byte offset of this chunk in the file
+  int64 offset = 2;
+}
+
+// List directory request
+message ListDirectoryRequest {
+  // Path to the directory to list
+  string path = 1;
+}
+
+// List directory response
+message ListDirectoryResponse {
+  // Directory entries
+  repeated DirectoryEntry entries = 1;
+}
+
+// Read file request
+message ReadFileRequest {
+  // Path to the file to read
+  string path = 1;
+  // Byte offset to start reading from
+  optional int64 offset = 2;
+  // Maximum number of bytes to read
+  optional int64 limit = 3;
+}
+
+// Read file response (streamed)
+message ReadFileResponse {
+  // File data chunk
+  StreamChunk chunk = 1;
+}
+
+// Write file request (streamed)
+message WriteFileRequest {
+  // Either metadata (first message) or chunk data
+  oneof data {
+    // File metadata for the write operation
+    WriteFileMetadata metadata = 1;
+    // File data chunk
+    StreamChunk chunk = 2;
+  }
+}
+
+// Write file metadata (first message in stream)
+message WriteFileMetadata {
+  // Path where the file should be written
+  string path = 1;
+  // File mode/permissions as Unix mode bits
+  uint32 mode = 2;
+  // Whether to create parent directories if they don't exist
+  bool create_parents = 3;
+}
+
+// Write file response
+message WriteFileResponse {
+  // Total number of bytes written
+  int64 bytes_written = 1;
+}
+
+// Create directory request
+message CreateDirectoryRequest {
+  // Path of the directory to create
+  string path = 1;
+  // Directory mode/permissions as Unix mode bits
+  uint32 mode = 2;
+  // Whether to create parent directories if they don't exist
+  bool create_parents = 3;
+}
+
+// Create directory response
+message CreateDirectoryResponse {}
+
+// Delete path request
+message DeletePathRequest {
+  // Path to delete
+  string path = 1;
+  // Whether to delete recursively (for directories)
+  bool recursive = 2;
+}
+
+// Delete path response
+message DeletePathResponse {}
+
+// Move path request
+message MovePathRequest {
+  // Source path
+  string from_path = 1;
+  // Destination path
+  string to_path = 2;
+}
+
+// Move path response
+message MovePathResponse {}
+
+// Get path info request
+message GetPathInfoRequest {
+  // Path to get information about
+  string path = 1;
+}
+
+// Get path info response
+message GetPathInfoResponse {
+  // File information
+  FileInfo file_info = 1;
+}
