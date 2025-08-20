@@ -1,5 +1,6 @@
 version: v2
 plugins:
+  # Go backend generation (existing)
   - local: protoc-gen-go
     out: gen
     opt:
@@ -8,3 +9,11 @@ plugins:
     out: gen
     opt:
       - paths=source_relative
+  
+  # TypeScript client generation (new)
+  - local: protoc-gen-es
+    out: client/gen
+    opt: target=ts,import_extension=none
+  - local: protoc-gen-connect-es
+    out: client/gen
+    opt: target=ts,import_extension=none
