@@ -5,7 +5,7 @@ import { FileService } from '../gen/files/v1/files_connect';
 
 // Create transport for web (HTTP)
 const transport = createConnectTransport({
-  baseUrl: 'http://localhost:8080',
+  baseUrl: 'http://192.168.8.143:8080',
 });
 
 // Create client
