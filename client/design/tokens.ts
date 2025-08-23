@@ -38,12 +38,13 @@ export const tokens = {
     '4xl': 36, // 2.25rem
   },
 
-  // Font weights
+  // Font weights (lighter, more elegant)
   fontWeight: {
+    light: '300',
     normal: '400',
-    medium: '500',
-    semibold: '600',
-    bold: '700',
+    medium: '450',
+    semibold: '500',
+    bold: '600',
   },
 
   // Line heights
@@ -74,46 +75,46 @@ export const tokens = {
     4: 4,
   },
 
-  // Colors (RGB values for easy manipulation)
+  // Colors (RGB values for easy manipulation) - Dark teal theme
   colors: {
-    // Background colors (dark theme)
+    // Background colors (dark teal inspired)
     bg: {
-      primary: [17, 24, 39],     // gray-900
-      secondary: [31, 41, 55],   // gray-800
-      tertiary: [55, 65, 81],    // gray-700
+      primary: [8, 12, 16],       // #080c10 - deep dark blue-grey
+      secondary: [15, 23, 28],    // #0f171c - slightly teal-tinted
+      tertiary: [22, 35, 42],     // #16232a - card backgrounds with teal hint
     },
     
-    // Text colors
+    // Text colors (softer, more elegant)
     text: {
-      primary: [243, 244, 246],  // gray-100
-      secondary: [209, 213, 219], // gray-300
-      muted: [156, 163, 175],    // gray-400
-      inverse: [17, 24, 39],     // gray-900
+      primary: [240, 248, 250],   // #f0f8fa - soft white with teal hint
+      secondary: [190, 210, 220], // #bedadc - muted teal-grey
+      muted: [140, 160, 170],     // #8ca0aa - subtle teal-grey
+      inverse: [8, 12, 16],       // #080c10 - matches primary bg
     },
 
-    // Border colors
+    // Border colors (subtle teal tones)
     border: {
-      primary: [55, 65, 81],     // gray-700
-      secondary: [75, 85, 99],   // gray-600
-      muted: [107, 114, 128],    // gray-500
+      primary: [35, 50, 60],      // #23323c - teal-tinted border
+      secondary: [50, 70, 80],    // #324650 - slightly more visible
+      muted: [70, 90, 100],       // #465a64 - muted teal border
     },
 
-    // Interactive colors
+    // Interactive colors (teal accent palette)
     interactive: {
-      primary: [34, 197, 94],     // green-500
-      primaryHover: [22, 163, 74], // green-600
-      danger: [239, 68, 68],      // red-500
-      dangerHover: [220, 38, 38], // red-600
-      warning: [245, 158, 11],    // amber-500
-      info: [59, 130, 246],       // blue-500
+      primary: [20, 184, 166],     // teal-500 - main accent
+      primaryHover: [13, 148, 136], // teal-600 - hover state
+      danger: [239, 68, 68],       // red-500 - keep for errors
+      dangerHover: [220, 38, 38],  // red-600
+      warning: [245, 158, 11],     // amber-500 - keep for warnings
+      info: [56, 189, 248],        // sky-400 - lighter blue
     },
 
-    // Status colors
+    // Status colors (teal-coordinated)
     status: {
-      success: [34, 197, 94],     // green-500
+      success: [20, 184, 166],    // teal-500 - matches primary
       error: [239, 68, 68],       // red-500
       warning: [245, 158, 11],    // amber-500
-      info: [59, 130, 246],       // blue-500
+      info: [56, 189, 248],       // sky-400
     },
   },
 
