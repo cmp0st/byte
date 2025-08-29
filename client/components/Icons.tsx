@@ -242,6 +242,92 @@ export const HomeIcon: React.FC<IconProps> = ({ size = 20, color = rgb(tokens.co
   </Svg>
 );
 
+export const PlusIcon: React.FC<IconProps> = ({ size = 20, color = rgb(tokens.colors.interactive.primary), opacity = 0.9 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 5V19M5 12H19"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+  </Svg>
+);
+
+export const EditIcon: React.FC<IconProps> = ({ size = 20, color = rgb(tokens.colors.interactive.primary), opacity = 0.9 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M11 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H16C17.1 20 18 19.1 18 18V11"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+    <Path
+      d="M18.5 2.5C19.33 1.67 20.67 1.67 21.5 2.5C22.33 3.33 22.33 4.67 21.5 5.5L12 15L8 16L9 12L18.5 2.5Z"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+  </Svg>
+);
+
+export const DeleteIcon: React.FC<IconProps> = ({ size = 20, color = rgb(tokens.colors.status.error), opacity = 0.9 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M3 6H5H21"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+    <Path
+      d="M8 6V4C8 3.45 8.22 2.95 8.61 2.61C8.95 2.22 9.45 2 10 2H14C14.55 2 15.05 2.22 15.39 2.61C15.78 2.95 16 3.45 16 4V6M19 6V20C19 20.55 18.78 21.05 18.39 21.39C18.05 21.78 17.55 22 17 22H7C6.45 22 5.95 21.78 5.61 21.39C5.22 21.05 5 20.55 5 20V6H19Z"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+  </Svg>
+);
+
+export const MoreIcon: React.FC<IconProps> = ({ size = 20, color = rgb(tokens.colors.text.muted), opacity = 0.9 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="1" fill={color} opacity={opacity} />
+    <Circle cx="19" cy="12" r="1" fill={color} opacity={opacity} />
+    <Circle cx="5" cy="12" r="1" fill={color} opacity={opacity} />
+  </Svg>
+);
+
+export const EyeIcon: React.FC<IconProps> = ({ size = 20, color = rgb(tokens.colors.interactive.primary), opacity = 0.9 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M1 12S5 4 12 4S23 12 23 12S19 20 12 20S1 12 1 12Z"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+    <Circle
+      cx="12"
+      cy="12"
+      r="3"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={opacity}
+    />
+  </Svg>
+);
+
 export const ByteLogo: React.FC<IconProps> = ({ size = 32, color = rgb(tokens.colors.interactive.primary), opacity = 0.9 }) => (
   <Svg width={size} height={size} viewBox="0 0 32 32" fill="none">
     {/* Outer hexagonal frame */}

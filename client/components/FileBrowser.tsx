@@ -7,7 +7,8 @@ import {
   StyleSheet, 
   Platform,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import { fileServiceClient, FileInfo, DirectoryEntry } from '../design/api';
 import { tokens, rgb, rgba } from '../design/tokens';
@@ -20,8 +21,15 @@ import {
   DocumentIcon, 
   GitIcon, 
   SettingsIcon,
-  HomeIcon 
+  HomeIcon,
+  PlusIcon,
+  EditIcon,
+  DeleteIcon,
+  EyeIcon,
+  MoreIcon
 } from './Icons';
+import { CreateModal } from './CreateModal';
+import { FileViewer } from './FileViewer';
 
 interface FileBrowserProps {
   initialPath?: string;
@@ -35,13 +43,19 @@ export function FileBrowser({ initialPath = '/' }: FileBrowserProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  
+  // Modal states
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [createModalType, setCreateModalType] = useState<'file' | 'folder'>('file');
+  const [fileViewerVisible, setFileViewerVisible] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
 
   const loadDirectory = async (path: string) => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fileServiceClient.listDirectory({ path });
+      const response = await fileServiceClient.listDirectory(path);
       setFiles(response.entries);
       setCurrentPath(path);
     } catch (err) {
@@ -62,9 +76,42 @@ export function FileBrowser({ initialPath = '/' }: FileBrowserProps) {
       const newPath = file.path;
       loadDirectory(newPath);
     } else {
-      // Handle file selection (for now, just log)
-      console.log('Selected file:', file.name);
+      // Open file viewer
+      setSelectedFile(file);
+      setFileViewerVisible(true);
     }
+  };
+
+  const handleCreateFile = () => {
+    setCreateModalType('file');
+    setCreateModalVisible(true);
+  };
+
+  const handleCreateFolder = () => {
+    setCreateModalType('folder');
+    setCreateModalVisible(true);
+  };
+
+  const handleDeleteFile = (file: FileInfo) => {
+    Alert.alert(
+      'Delete Item',
+      `Are you sure you want to delete "${file.name}"?${file.isDir ? ' This will delete all contents.' : ''}`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await fileServiceClient.deletePath(file.path, file.isDir);
+              loadDirectory(currentPath); // Refresh
+            } catch (err) {
+              Alert.alert('Error', err instanceof Error ? err.message : 'Failed to delete item');
+            }
+          }
+        }
+      ]
+    );
   };
 
   const handleBackPress = () => {
@@ -155,16 +202,38 @@ export function FileBrowser({ initialPath = '/' }: FileBrowserProps) {
     const typeLabel = getFileTypeLabel(file);
     
     return (
-      <TouchableOpacity 
-        style={styles.gridItem} 
-        onPress={() => handleFilePress(file)}
-      >
-        {typeLabel && <View style={styles.typeLabel}><Text style={styles.typeLabelText}>{typeLabel}</Text></View>}
-        <View style={styles.gridIcon}>
-          {getFileIcon(file, 32)}
+      <View style={styles.gridItemContainer}>
+        <TouchableOpacity 
+          style={styles.gridItem} 
+          onPress={() => handleFilePress(file)}
+        >
+          {typeLabel && <View style={styles.typeLabel}><Text style={styles.typeLabelText}>{typeLabel}</Text></View>}
+          <View style={styles.gridIcon}>
+            {getFileIcon(file, 32)}
+          </View>
+          <Text style={styles.gridFileName} numberOfLines={2}>{file.name}</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.gridActions}>
+          {!file.isDir && (
+            <TouchableOpacity
+              style={styles.gridActionButton}
+              onPress={() => {
+                setSelectedFile(file);
+                setFileViewerVisible(true);
+              }}
+            >
+              <EyeIcon size={14} />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.gridActionButton}
+            onPress={() => handleDeleteFile(file)}
+          >
+            <DeleteIcon size={14} />
+          </TouchableOpacity>
         </View>
-        <Text style={styles.gridFileName} numberOfLines={2}>{file.name}</Text>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -184,6 +253,30 @@ export function FileBrowser({ initialPath = '/' }: FileBrowserProps) {
           <Text style={styles.listFileDetails}>
             {file.isDir ? 'Directory' : `${Math.round(Number(file.size) / 1024)} KB`}
           </Text>
+        </View>
+        
+        <View style={styles.listActions}>
+          {!file.isDir && (
+            <TouchableOpacity
+              style={styles.listActionButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                setSelectedFile(file);
+                setFileViewerVisible(true);
+              }}
+            >
+              <EyeIcon size={16} />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.listActionButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              handleDeleteFile(file);
+            }}
+          >
+            <DeleteIcon size={16} />
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
@@ -231,23 +324,40 @@ export function FileBrowser({ initialPath = '/' }: FileBrowserProps) {
           ))}
         </View>
         
-        <View style={styles.viewToggle}>
-          <TouchableOpacity 
-            style={[styles.toggleButton, viewMode === 'grid' && styles.activeToggle]}
-            onPress={() => setViewMode('grid')}
-          >
-            <Text style={[styles.toggleText, viewMode === 'grid' && styles.activeToggleText]}>
-              grid
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.toggleButton, viewMode === 'list' && styles.activeToggle]}
-            onPress={() => setViewMode('list')}
-          >
-            <Text style={[styles.toggleText, viewMode === 'list' && styles.activeToggleText]}>
-              list
-            </Text>
-          </TouchableOpacity>
+        <View style={styles.rightControls}>
+          <View style={styles.createButtons}>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={handleCreateFolder}
+            >
+              <FolderIcon size={16} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={handleCreateFile}
+            >
+              <PlusIcon size={16} />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.viewToggle}>
+            <TouchableOpacity 
+              style={[styles.toggleButton, viewMode === 'grid' && styles.activeToggle]}
+              onPress={() => setViewMode('grid')}
+            >
+              <Text style={[styles.toggleText, viewMode === 'grid' && styles.activeToggleText]}>
+                grid
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.toggleButton, viewMode === 'list' && styles.activeToggle]}
+              onPress={() => setViewMode('list')}
+            >
+              <Text style={[styles.toggleText, viewMode === 'list' && styles.activeToggleText]}>
+                list
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -284,6 +394,22 @@ export function FileBrowser({ initialPath = '/' }: FileBrowserProps) {
           key={`${viewMode}-${numColumns}`} // Force re-render when switching modes
         />
       )}
+
+      {/* Modals */}
+      <CreateModal
+        visible={createModalVisible}
+        onClose={() => setCreateModalVisible(false)}
+        currentPath={currentPath}
+        onRefresh={() => loadDirectory(currentPath)}
+        type={createModalType}
+      />
+
+      <FileViewer
+        visible={fileViewerVisible}
+        onClose={() => setFileViewerVisible(false)}
+        file={selectedFile}
+        onRefresh={() => loadDirectory(currentPath)}
+      />
     </View>
   );
 }
@@ -342,6 +468,29 @@ const styles = StyleSheet.create({
   breadcrumbSpace: {
     color: rgba(tokens.colors.text.muted, 0.6),
     fontSize: tokens.fontSize.base,
+  },
+  
+  // Right controls container
+  rightControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: tokens.space[4],
+  },
+  
+  // Create buttons
+  createButtons: {
+    flexDirection: 'row',
+    gap: tokens.space[2],
+  },
+  createButton: {
+    width: 32,
+    height: 32,
+    borderRadius: tokens.borderRadius.md,
+    backgroundColor: rgba(tokens.colors.interactive.primary, 0.1),
+    borderWidth: tokens.borderWidth[1],
+    borderColor: rgba(tokens.colors.interactive.primary, 0.3),
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   
   // View Toggle - glassmorphic design
@@ -421,6 +570,9 @@ const styles = StyleSheet.create({
   },
   
   // Grid Items - glassmorphic design
+  gridItemContainer: {
+    position: 'relative',
+  },
   gridItem: {
     flex: 1,
     aspectRatio: 1,
@@ -436,6 +588,23 @@ const styles = StyleSheet.create({
     ...tokens.shadows.sm,
     maxWidth: 120,
     minHeight: 120,
+  },
+  gridActions: {
+    position: 'absolute',
+    top: tokens.space[1],
+    right: tokens.space[1],
+    flexDirection: 'row',
+    gap: tokens.space[1],
+  },
+  gridActionButton: {
+    width: 24,
+    height: 24,
+    borderRadius: tokens.borderRadius.sm,
+    backgroundColor: rgba(tokens.colors.bg.primary, 0.8),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: tokens.borderWidth[1],
+    borderColor: rgba(tokens.colors.border.primary, 0.3),
   },
   typeLabel: {
     position: 'absolute',
@@ -505,5 +674,20 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.sm,
     fontFamily: Platform.OS === 'web' ? tokens.fonts.mono : undefined,
     fontWeight: tokens.fontWeight.light,
+  },
+  listActions: {
+    flexDirection: 'row',
+    gap: tokens.space[2],
+    marginLeft: tokens.space[2],
+  },
+  listActionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: tokens.borderRadius.sm,
+    backgroundColor: rgba(tokens.colors.bg.primary, 0.6),
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: tokens.borderWidth[1],
+    borderColor: rgba(tokens.colors.border.primary, 0.3),
   },
 });
