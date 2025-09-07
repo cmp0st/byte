@@ -18,7 +18,11 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 	keyFingerprint := gossh.FingerprintSHA256(key)
 
 	if len(authorizedKeys) == 0 {
-		slog.Warn("Authentication denied: no authorized keys configured", "key_type", keyType, "fingerprint", keyFingerprint)
+		slog.Warn(
+			"Authentication denied: no authorized keys configured",
+			"key_type", keyType,
+			"fingerprint", keyFingerprint,
+		)
 		return false
 	}
 
@@ -38,12 +42,24 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 		}
 
 		if parsedKey.Type() == keyType && string(parsedKey.Marshal()) == string(keyData) {
-			slog.Info("Authentication successful", "key_type", keyType, "fingerprint", keyFingerprint)
+			slog.Info(
+				"Authentication successful",
+				"key_type",
+				keyType,
+				"fingerprint",
+				keyFingerprint,
+			)
 			return true
 		}
 	}
 
-	slog.Warn("Authentication denied: key not found in authorized keys", "key_type", keyType, "fingerprint", keyFingerprint)
+	slog.Warn(
+		"Authentication denied: key not found in authorized keys",
+		"key_type",
+		keyType,
+		"fingerprint",
+		keyFingerprint,
+	)
 	return false
 }
 
@@ -78,7 +94,15 @@ func NewServer(c config.SFTP, h *Handlers, k key.ServerChain) (*ssh.Server, erro
 
 			server := sftp.NewRequestServer(sess, handlers)
 			if err := server.Serve(); err != nil {
-				slog.Error("SFTP server error", "error", err, "user", user, "remote_addr", remoteAddr)
+				slog.Error(
+					"SFTP server error",
+					"error",
+					err,
+					"user",
+					user,
+					"remote_addr",
+					remoteAddr,
+				)
 			} else {
 				slog.Info("SFTP session ended", "user", user, "remote_addr", remoteAddr)
 			}

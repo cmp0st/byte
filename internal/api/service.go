@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/afero"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/cmp0st/byte/gen/files/v1"
+	filesv1 "github.com/cmp0st/byte/gen/files/v1"
 	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
 	"github.com/cmp0st/byte/internal/storage"
 )
@@ -29,7 +29,10 @@ func NewFileService(storage storage.Interface) filesv1connect.FileServiceHandler
 }
 
 // ListDirectory lists the contents of a directory
-func (s *FileService) ListDirectory(ctx context.Context, req *connect.Request[filesv1.ListDirectoryRequest]) (*connect.Response[filesv1.ListDirectoryResponse], error) {
+func (s *FileService) ListDirectory(
+	ctx context.Context,
+	req *connect.Request[filesv1.ListDirectoryRequest],
+) (*connect.Response[filesv1.ListDirectoryResponse], error) {
 	start := time.Now()
 	slog.Debug("API: ListDirectory request", "path", req.Msg.Path)
 
@@ -39,8 +42,16 @@ func (s *FileService) ListDirectory(ctx context.Context, req *connect.Request[fi
 	}
 	entries, err := afero.ReadDir(s.storage, req.Msg.Path)
 	if err != nil {
-		slog.Error("API: Failed to list directory", "path", req.Msg.Path, "error", err, "duration", time.Since(start))
-		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("failed to list directory: %w", err))
+		slog.Error(
+			"API: Failed to list directory",
+			"path", req.Msg.Path,
+			"error", err,
+			"duration", time.Since(start),
+		)
+		return nil, connect.NewError(
+			connect.CodeNotFound,
+			fmt.Errorf("failed to list directory: %w", err),
+		)
 	}
 
 	var directoryEntries []*filesv1.FileInfo

@@ -11,7 +11,12 @@ import (
 )
 
 func NewS3(cfg config.S3) (Interface, error) {
-	slog.Info("Initializing S3 storage", "bucket", cfg.Bucket, "region", cfg.Region, "has_endpoint", cfg.Endpoint != "")
+	slog.Info(
+		"Initializing S3 storage",
+		"bucket", cfg.Bucket,
+		"region", cfg.Region,
+		"has_endpoint", cfg.Endpoint != "",
+	)
 
 	awsConfig := &aws.Config{
 		Region: aws.String(cfg.Region),
@@ -39,7 +44,15 @@ func NewS3(cfg config.S3) (Interface, error) {
 
 	sess, err := session.NewSession(awsConfig)
 	if err != nil {
-		slog.Error("Failed to create AWS session", "error", err, "bucket", cfg.Bucket, "region", cfg.Region)
+		slog.Error(
+			"Failed to create AWS session",
+			"error",
+			err,
+			"bucket",
+			cfg.Bucket,
+			"region",
+			cfg.Region,
+		)
 		return nil, err
 	}
 

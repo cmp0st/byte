@@ -10,7 +10,10 @@ import (
 
 func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
-		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+		return connect.UnaryFunc(func(
+			ctx context.Context,
+			req connect.AnyRequest,
+		) (connect.AnyResponse, error) {
 			start := time.Now()
 			requestLogger := logger.With(
 				slog.String("procedure", req.Spec().Procedure),

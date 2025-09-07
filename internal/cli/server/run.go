@@ -80,8 +80,12 @@ func run(cmd *cobra.Command, args []string) error {
 	// Add SFTP server
 	{
 		g.Add(func() error {
-			slog.Info("Starting SFTP server", "address", fmt.Sprintf("%s:%d", conf.SFTP.Host, conf.SFTP.Port))
-			if err := sftpServer.ListenAndServe(); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
+			slog.Info(
+				"Starting SFTP server",
+				"address", fmt.Sprintf("%s:%d", conf.SFTP.Host, conf.SFTP.Port),
+			)
+			if err := sftpServer.ListenAndServe(); err != nil &&
+				!errors.Is(err, ssh.ErrServerClosed) {
 				return fmt.Errorf("SFTP server failed: %w", err)
 			}
 			return nil

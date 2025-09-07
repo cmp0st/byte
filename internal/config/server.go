@@ -8,7 +8,7 @@ import (
 
 type Server struct {
 	LogLevel string `mapstructure:"log_level" yaml:"log_level"`
-	Secret   string `mapstructure:"secret" yaml:"secret"`
+	Secret   string `mapstructure:"secret"    yaml:"secret"`
 
 	SFTP SFTP `mapstructure:"sftp" yaml:"sftp"`
 	HTTP HTTP `mapstructure:"http" yaml:"http"`
@@ -17,8 +17,8 @@ type Server struct {
 }
 
 type SFTP struct {
-	Host           string   `mapstructure:"host" yaml:"host"`
-	Port           int      `mapstructure:"port" yaml:"port"`
+	Host           string   `mapstructure:"host"            yaml:"host"`
+	Port           int      `mapstructure:"port"            yaml:"port"`
 	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
 }
 
@@ -28,9 +28,9 @@ type HTTP struct {
 }
 
 type Storage struct {
-	Posix    *Posix    `mapstructure:"posix" yaml:"posix"`
+	Posix    *Posix    `mapstructure:"posix"     yaml:"posix"`
 	InMemory *InMemory `mapstructure:"in_memory" yaml:"in_memory"`
-	S3       *S3       `mapstructure:"s3" yaml:"s3"`
+	S3       *S3       `mapstructure:"s3"        yaml:"s3"`
 }
 
 type Posix struct {
@@ -40,12 +40,12 @@ type Posix struct {
 type InMemory struct{}
 
 type S3 struct {
-	Bucket    string `mapstructure:"bucket" yaml:"bucket"`
-	Region    string `mapstructure:"region" yaml:"region"`
-	Endpoint  string `mapstructure:"endpoint" yaml:"endpoint"`
+	Bucket    string `mapstructure:"bucket"     yaml:"bucket"`
+	Region    string `mapstructure:"region"     yaml:"region"`
+	Endpoint  string `mapstructure:"endpoint"   yaml:"endpoint"`
 	AccessKey string `mapstructure:"access_key" yaml:"access_key"`
 	SecretKey string `mapstructure:"secret_key" yaml:"secret_key"`
-	UseSSL    *bool  `mapstructure:"use_ssl" yaml:"use_ssl"`
+	UseSSL    *bool  `mapstructure:"use_ssl"    yaml:"use_ssl"`
 }
 
 func LoadServer() (*Server, error) {

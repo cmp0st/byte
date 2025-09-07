@@ -61,7 +61,12 @@ func (s *Handlers) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 	// First try to open the file normally
 	file, err := s.Storage.OpenFile(r.Filepath, flags, 0644)
 	if err != nil {
-		slog.Error("Failed to open file for writing", "path", r.Filepath, "flags", r.Flags, "error", err)
+		slog.Error(
+			"Failed to open file for writing",
+			"path", r.Filepath,
+			"flags", r.Flags,
+			"error", err,
+		)
 		return nil, sftpErrFromPathError(err)
 	}
 	return file, nil
