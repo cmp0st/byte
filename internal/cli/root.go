@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/cmp0st/byte/internal/cli/server"
 	"github.com/spf13/cobra"
 )
 
@@ -11,8 +12,7 @@ func New() *cobra.Command {
 		Version: "",
 	}
 
-	cmd.AddCommand(NewServeCmd())
-	cmd.AddCommand(NewGenKeyCmd())
+	cmd.AddCommand(server.NewCommand())
 
 	return cmd
 }

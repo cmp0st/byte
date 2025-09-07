@@ -6,8 +6,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct {
+type Server struct {
 	LogLevel string `mapstructure:"log_level" yaml:"log_level"`
+	Secret   string `mapstructure:"secret" yaml:"secret"`
 
 	SFTP SFTP `mapstructure:"sftp" yaml:"sftp"`
 	HTTP HTTP `mapstructure:"http" yaml:"http"`
@@ -18,7 +19,6 @@ type Config struct {
 type SFTP struct {
 	Host           string   `mapstructure:"host" yaml:"host"`
 	Port           int      `mapstructure:"port" yaml:"port"`
-	HostKey        string   `mapstructure:"host_key" yaml:"host_key"`
 	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
 }
 
@@ -48,7 +48,7 @@ type S3 struct {
 	UseSSL    *bool  `mapstructure:"use_ssl" yaml:"use_ssl"`
 }
 
-func Load() (*Config, error) {
+func LoadServer() (*Server, error) {
 	v := viper.New()
 
 	// Set defaults
@@ -71,7 +71,7 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
-	var cfg Config
+	var cfg Server
 	if err := v.Unmarshal(&cfg); err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}

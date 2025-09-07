@@ -3,8 +3,11 @@ module github.com/cmp0st/byte
 go 1.24.5
 
 require (
+	aidanwoods.dev/go-paseto v1.5.4
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250717165733-d22d418d82d8.1
 	connectrpc.com/connect v1.18.1
 	connectrpc.com/cors v0.1.0
+	connectrpc.com/validate v0.3.0
 	github.com/aws/aws-sdk-go v1.55.8
 	github.com/charmbracelet/ssh v0.0.0-20250128164007-98fd5ae11894
 	github.com/charmbracelet/wish v1.4.7
@@ -20,10 +23,9 @@ require (
 )
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250717165733-d22d418d82d8.1 // indirect
+	aidanwoods.dev/go-result v0.3.1 // indirect
 	buf.build/go/protovalidate v0.14.0 // indirect
 	cel.dev/expr v0.23.1 // indirect
-	connectrpc.com/validate v0.3.0 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect

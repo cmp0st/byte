@@ -1,4 +1,4 @@
-package cli
+package server
 
 import (
 	"context"
@@ -12,27 +12,36 @@ import (
 	"time"
 
 	"github.com/charmbracelet/ssh"
-	"github.com/oklog/run"
-	"github.com/spf13/cobra"
-
 	"github.com/cmp0st/byte/internal/api"
 	"github.com/cmp0st/byte/internal/config"
+	"github.com/cmp0st/byte/internal/key"
 	"github.com/cmp0st/byte/internal/sftp"
 	"github.com/cmp0st/byte/internal/storage"
+	oklogrun "github.com/oklog/run"
+	"github.com/spf13/cobra"
 )
 
-func NewServeCmd() *cobra.Command {
+func newRunCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:   "serve",
+		Use:   "run",
 		Short: "run the byte server",
-		RunE:  serve,
+		RunE:  run,
 	}
 }
 
-func serve(cmd *cobra.Command, args []string) error {
-	conf, err := config.Load()
+func run(cmd *cobra.Command, args []string) error {
+	conf, err := config.LoadServer()
 	if err != nil {
 		return fmt.Errorf("Failed to load config: %v", err)
+	}
+
+	if conf.Secret == "" || len(conf.Secret) < 32 {
+		return fmt.Errorf("invalid server secret, must be more than 32 charactors")
+	}
+
+	keychain, err := key.NewServerChain([]byte(conf.Secret))
+	if err != nil {
+		return err
 	}
 
 	var level slog.Level
@@ -62,7 +71,7 @@ func serve(cmd *cobra.Command, args []string) error {
 	// Create SFTP server
 	sftpServer, err := sftp.NewServer(conf.SFTP, &sftp.Handlers{
 		Storage: store,
-	})
+	}, *keychain)
 	if err != nil {
 		slog.Error("Failed to create SSH server", "error", err)
 		return fmt.Errorf("failed to create SSH server: %w", err)
@@ -70,12 +79,12 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	// Create HTTP API server
 	httpAddr := fmt.Sprintf("%s:%d", conf.HTTP.Host, conf.HTTP.Port)
-	apiServer, err := api.NewServer(store, httpAddr)
+	apiServer, err := api.NewServer(store, *keychain, httpAddr)
 	if err != nil {
 		return fmt.Errorf("misconfigured api server: %w", err)
 	}
 
-	var g run.Group
+	var g oklogrun.Group
 
 	// Add SFTP server
 	{

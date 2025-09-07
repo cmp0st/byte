@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/ssh"
 	"github.com/charmbracelet/wish"
 	"github.com/cmp0st/byte/internal/config"
+	"github.com/cmp0st/byte/internal/key"
 	"github.com/pkg/sftp"
 	gossh "golang.org/x/crypto/ssh"
 )
@@ -46,10 +47,19 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 	return false
 }
 
-func NewServer(c config.SFTP, h *Handlers) (*ssh.Server, error) {
+func NewServer(c config.SFTP, h *Handlers, k key.ServerChain) (*ssh.Server, error) {
+	raw, err := k.SSHHostKey()
+	if err != nil {
+		return nil, err
+	}
+	hostKeyPEM, err := key.ToPEM(raw)
+	if err != nil {
+		return nil, err
+	}
+
 	return wish.NewServer(
 		wish.WithAddress(fmt.Sprintf("%s:%d", c.Host, c.Port)),
-		wish.WithHostKeyPEM([]byte(c.HostKey)),
+		wish.WithHostKeyPEM(hostKeyPEM),
 		wish.WithPublicKeyAuth(func(ctx ssh.Context, key ssh.PublicKey) bool {
 			return isAuthorizedKey(c.AuthorizedKeys, key)
 		}),

@@ -8,6 +8,8 @@ import (
 	connectcors "connectrpc.com/cors"
 	"connectrpc.com/validate"
 	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
+	"github.com/cmp0st/byte/internal/auth"
+	"github.com/cmp0st/byte/internal/key"
 	"github.com/cmp0st/byte/internal/storage"
 	"github.com/rs/cors"
 )
@@ -19,7 +21,7 @@ type Server struct {
 }
 
 // NewServer creates a new API server
-func NewServer(storage storage.Interface, addr string) (*Server, error) {
+func NewServer(storage storage.Interface, chain key.ServerChain, addr string) (*Server, error) {
 	slog.Debug("API: Creating new server", "addr", addr)
 
 	mux := http.NewServeMux()
@@ -39,6 +41,7 @@ func NewServer(storage storage.Interface, addr string) (*Server, error) {
 	path, handler := filesv1connect.NewFileServiceHandler(
 		fileService,
 		connect.WithInterceptors(
+			auth.NewServerInterceptor(chain),
 			validateInterceptor,
 		),
 	)
