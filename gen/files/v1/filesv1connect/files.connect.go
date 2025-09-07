@@ -36,37 +36,12 @@ const (
 	// FileServiceListDirectoryProcedure is the fully-qualified name of the FileService's ListDirectory
 	// RPC.
 	FileServiceListDirectoryProcedure = "/files.v1.FileService/ListDirectory"
-	// FileServiceReadFileProcedure is the fully-qualified name of the FileService's ReadFile RPC.
-	FileServiceReadFileProcedure = "/files.v1.FileService/ReadFile"
-	// FileServiceWriteFileProcedure is the fully-qualified name of the FileService's WriteFile RPC.
-	FileServiceWriteFileProcedure = "/files.v1.FileService/WriteFile"
-	// FileServiceCreateDirectoryProcedure is the fully-qualified name of the FileService's
-	// CreateDirectory RPC.
-	FileServiceCreateDirectoryProcedure = "/files.v1.FileService/CreateDirectory"
-	// FileServiceDeletePathProcedure is the fully-qualified name of the FileService's DeletePath RPC.
-	FileServiceDeletePathProcedure = "/files.v1.FileService/DeletePath"
-	// FileServiceMovePathProcedure is the fully-qualified name of the FileService's MovePath RPC.
-	FileServiceMovePathProcedure = "/files.v1.FileService/MovePath"
-	// FileServiceGetPathInfoProcedure is the fully-qualified name of the FileService's GetPathInfo RPC.
-	FileServiceGetPathInfoProcedure = "/files.v1.FileService/GetPathInfo"
 )
 
 // FileServiceClient is a client for the files.v1.FileService service.
 type FileServiceClient interface {
 	// List directory contents
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
-	// Read file content (streaming for large files)
-	ReadFile(context.Context, *connect.Request[v1.ReadFileRequest]) (*connect.ServerStreamForClient[v1.ReadFileResponse], error)
-	// Write file content (streaming for large files)
-	WriteFile(context.Context) *connect.ClientStreamForClient[v1.WriteFileRequest, v1.WriteFileResponse]
-	// Create a directory
-	CreateDirectory(context.Context, *connect.Request[v1.CreateDirectoryRequest]) (*connect.Response[v1.CreateDirectoryResponse], error)
-	// Delete a file or directory
-	DeletePath(context.Context, *connect.Request[v1.DeletePathRequest]) (*connect.Response[v1.DeletePathResponse], error)
-	// Move/rename a file or directory
-	MovePath(context.Context, *connect.Request[v1.MovePathRequest]) (*connect.Response[v1.MovePathResponse], error)
-	// Get file or directory information
-	GetPathInfo(context.Context, *connect.Request[v1.GetPathInfoRequest]) (*connect.Response[v1.GetPathInfoResponse], error)
 }
 
 // NewFileServiceClient constructs a client for the files.v1.FileService service. By default, it
@@ -86,54 +61,12 @@ func NewFileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(fileServiceMethods.ByName("ListDirectory")),
 			connect.WithClientOptions(opts...),
 		),
-		readFile: connect.NewClient[v1.ReadFileRequest, v1.ReadFileResponse](
-			httpClient,
-			baseURL+FileServiceReadFileProcedure,
-			connect.WithSchema(fileServiceMethods.ByName("ReadFile")),
-			connect.WithClientOptions(opts...),
-		),
-		writeFile: connect.NewClient[v1.WriteFileRequest, v1.WriteFileResponse](
-			httpClient,
-			baseURL+FileServiceWriteFileProcedure,
-			connect.WithSchema(fileServiceMethods.ByName("WriteFile")),
-			connect.WithClientOptions(opts...),
-		),
-		createDirectory: connect.NewClient[v1.CreateDirectoryRequest, v1.CreateDirectoryResponse](
-			httpClient,
-			baseURL+FileServiceCreateDirectoryProcedure,
-			connect.WithSchema(fileServiceMethods.ByName("CreateDirectory")),
-			connect.WithClientOptions(opts...),
-		),
-		deletePath: connect.NewClient[v1.DeletePathRequest, v1.DeletePathResponse](
-			httpClient,
-			baseURL+FileServiceDeletePathProcedure,
-			connect.WithSchema(fileServiceMethods.ByName("DeletePath")),
-			connect.WithClientOptions(opts...),
-		),
-		movePath: connect.NewClient[v1.MovePathRequest, v1.MovePathResponse](
-			httpClient,
-			baseURL+FileServiceMovePathProcedure,
-			connect.WithSchema(fileServiceMethods.ByName("MovePath")),
-			connect.WithClientOptions(opts...),
-		),
-		getPathInfo: connect.NewClient[v1.GetPathInfoRequest, v1.GetPathInfoResponse](
-			httpClient,
-			baseURL+FileServiceGetPathInfoProcedure,
-			connect.WithSchema(fileServiceMethods.ByName("GetPathInfo")),
-			connect.WithClientOptions(opts...),
-		),
 	}
 }
 
 // fileServiceClient implements FileServiceClient.
 type fileServiceClient struct {
-	listDirectory   *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
-	readFile        *connect.Client[v1.ReadFileRequest, v1.ReadFileResponse]
-	writeFile       *connect.Client[v1.WriteFileRequest, v1.WriteFileResponse]
-	createDirectory *connect.Client[v1.CreateDirectoryRequest, v1.CreateDirectoryResponse]
-	deletePath      *connect.Client[v1.DeletePathRequest, v1.DeletePathResponse]
-	movePath        *connect.Client[v1.MovePathRequest, v1.MovePathResponse]
-	getPathInfo     *connect.Client[v1.GetPathInfoRequest, v1.GetPathInfoResponse]
+	listDirectory *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
 }
 
 // ListDirectory calls files.v1.FileService.ListDirectory.
@@ -141,52 +74,10 @@ func (c *fileServiceClient) ListDirectory(ctx context.Context, req *connect.Requ
 	return c.listDirectory.CallUnary(ctx, req)
 }
 
-// ReadFile calls files.v1.FileService.ReadFile.
-func (c *fileServiceClient) ReadFile(ctx context.Context, req *connect.Request[v1.ReadFileRequest]) (*connect.ServerStreamForClient[v1.ReadFileResponse], error) {
-	return c.readFile.CallServerStream(ctx, req)
-}
-
-// WriteFile calls files.v1.FileService.WriteFile.
-func (c *fileServiceClient) WriteFile(ctx context.Context) *connect.ClientStreamForClient[v1.WriteFileRequest, v1.WriteFileResponse] {
-	return c.writeFile.CallClientStream(ctx)
-}
-
-// CreateDirectory calls files.v1.FileService.CreateDirectory.
-func (c *fileServiceClient) CreateDirectory(ctx context.Context, req *connect.Request[v1.CreateDirectoryRequest]) (*connect.Response[v1.CreateDirectoryResponse], error) {
-	return c.createDirectory.CallUnary(ctx, req)
-}
-
-// DeletePath calls files.v1.FileService.DeletePath.
-func (c *fileServiceClient) DeletePath(ctx context.Context, req *connect.Request[v1.DeletePathRequest]) (*connect.Response[v1.DeletePathResponse], error) {
-	return c.deletePath.CallUnary(ctx, req)
-}
-
-// MovePath calls files.v1.FileService.MovePath.
-func (c *fileServiceClient) MovePath(ctx context.Context, req *connect.Request[v1.MovePathRequest]) (*connect.Response[v1.MovePathResponse], error) {
-	return c.movePath.CallUnary(ctx, req)
-}
-
-// GetPathInfo calls files.v1.FileService.GetPathInfo.
-func (c *fileServiceClient) GetPathInfo(ctx context.Context, req *connect.Request[v1.GetPathInfoRequest]) (*connect.Response[v1.GetPathInfoResponse], error) {
-	return c.getPathInfo.CallUnary(ctx, req)
-}
-
 // FileServiceHandler is an implementation of the files.v1.FileService service.
 type FileServiceHandler interface {
 	// List directory contents
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
-	// Read file content (streaming for large files)
-	ReadFile(context.Context, *connect.Request[v1.ReadFileRequest], *connect.ServerStream[v1.ReadFileResponse]) error
-	// Write file content (streaming for large files)
-	WriteFile(context.Context, *connect.ClientStream[v1.WriteFileRequest]) (*connect.Response[v1.WriteFileResponse], error)
-	// Create a directory
-	CreateDirectory(context.Context, *connect.Request[v1.CreateDirectoryRequest]) (*connect.Response[v1.CreateDirectoryResponse], error)
-	// Delete a file or directory
-	DeletePath(context.Context, *connect.Request[v1.DeletePathRequest]) (*connect.Response[v1.DeletePathResponse], error)
-	// Move/rename a file or directory
-	MovePath(context.Context, *connect.Request[v1.MovePathRequest]) (*connect.Response[v1.MovePathResponse], error)
-	// Get file or directory information
-	GetPathInfo(context.Context, *connect.Request[v1.GetPathInfoRequest]) (*connect.Response[v1.GetPathInfoResponse], error)
 }
 
 // NewFileServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -202,58 +93,10 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(fileServiceMethods.ByName("ListDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
-	fileServiceReadFileHandler := connect.NewServerStreamHandler(
-		FileServiceReadFileProcedure,
-		svc.ReadFile,
-		connect.WithSchema(fileServiceMethods.ByName("ReadFile")),
-		connect.WithHandlerOptions(opts...),
-	)
-	fileServiceWriteFileHandler := connect.NewClientStreamHandler(
-		FileServiceWriteFileProcedure,
-		svc.WriteFile,
-		connect.WithSchema(fileServiceMethods.ByName("WriteFile")),
-		connect.WithHandlerOptions(opts...),
-	)
-	fileServiceCreateDirectoryHandler := connect.NewUnaryHandler(
-		FileServiceCreateDirectoryProcedure,
-		svc.CreateDirectory,
-		connect.WithSchema(fileServiceMethods.ByName("CreateDirectory")),
-		connect.WithHandlerOptions(opts...),
-	)
-	fileServiceDeletePathHandler := connect.NewUnaryHandler(
-		FileServiceDeletePathProcedure,
-		svc.DeletePath,
-		connect.WithSchema(fileServiceMethods.ByName("DeletePath")),
-		connect.WithHandlerOptions(opts...),
-	)
-	fileServiceMovePathHandler := connect.NewUnaryHandler(
-		FileServiceMovePathProcedure,
-		svc.MovePath,
-		connect.WithSchema(fileServiceMethods.ByName("MovePath")),
-		connect.WithHandlerOptions(opts...),
-	)
-	fileServiceGetPathInfoHandler := connect.NewUnaryHandler(
-		FileServiceGetPathInfoProcedure,
-		svc.GetPathInfo,
-		connect.WithSchema(fileServiceMethods.ByName("GetPathInfo")),
-		connect.WithHandlerOptions(opts...),
-	)
 	return "/files.v1.FileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FileServiceListDirectoryProcedure:
 			fileServiceListDirectoryHandler.ServeHTTP(w, r)
-		case FileServiceReadFileProcedure:
-			fileServiceReadFileHandler.ServeHTTP(w, r)
-		case FileServiceWriteFileProcedure:
-			fileServiceWriteFileHandler.ServeHTTP(w, r)
-		case FileServiceCreateDirectoryProcedure:
-			fileServiceCreateDirectoryHandler.ServeHTTP(w, r)
-		case FileServiceDeletePathProcedure:
-			fileServiceDeletePathHandler.ServeHTTP(w, r)
-		case FileServiceMovePathProcedure:
-			fileServiceMovePathHandler.ServeHTTP(w, r)
-		case FileServiceGetPathInfoProcedure:
-			fileServiceGetPathInfoHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -265,28 +108,4 @@ type UnimplementedFileServiceHandler struct{}
 
 func (UnimplementedFileServiceHandler) ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.ListDirectory is not implemented"))
-}
-
-func (UnimplementedFileServiceHandler) ReadFile(context.Context, *connect.Request[v1.ReadFileRequest], *connect.ServerStream[v1.ReadFileResponse]) error {
-	return connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.ReadFile is not implemented"))
-}
-
-func (UnimplementedFileServiceHandler) WriteFile(context.Context, *connect.ClientStream[v1.WriteFileRequest]) (*connect.Response[v1.WriteFileResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.WriteFile is not implemented"))
-}
-
-func (UnimplementedFileServiceHandler) CreateDirectory(context.Context, *connect.Request[v1.CreateDirectoryRequest]) (*connect.Response[v1.CreateDirectoryResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.CreateDirectory is not implemented"))
-}
-
-func (UnimplementedFileServiceHandler) DeletePath(context.Context, *connect.Request[v1.DeletePathRequest]) (*connect.Response[v1.DeletePathResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.DeletePath is not implemented"))
-}
-
-func (UnimplementedFileServiceHandler) MovePath(context.Context, *connect.Request[v1.MovePathRequest]) (*connect.Response[v1.MovePathResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.MovePath is not implemented"))
-}
-
-func (UnimplementedFileServiceHandler) GetPathInfo(context.Context, *connect.Request[v1.GetPathInfoRequest]) (*connect.Response[v1.GetPathInfoResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.GetPathInfo is not implemented"))
 }

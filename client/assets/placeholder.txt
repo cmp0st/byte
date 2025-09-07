@@ -1,2 +1,0 @@
-# Placeholder for assets
-# Add icon.png, splash.png, favicon.png here

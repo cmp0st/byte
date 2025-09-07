@@ -4,7 +4,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
+	"connectrpc.com/validate"
 	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
 	"github.com/cmp0st/byte/internal/storage"
 	"github.com/rs/cors"
@@ -17,7 +19,7 @@ type Server struct {
 }
 
 // NewServer creates a new API server
-func NewServer(storage storage.Interface, addr string) *Server {
+func NewServer(storage storage.Interface, addr string) (*Server, error) {
 	slog.Debug("API: Creating new server", "addr", addr)
 
 	mux := http.NewServeMux()
@@ -26,8 +28,20 @@ func NewServer(storage storage.Interface, addr string) *Server {
 	fileService := NewFileService(storage)
 	slog.Debug("API: File service created")
 
+	validateInterceptor, err := validate.NewInterceptor()
+	if err != nil {
+		slog.Error("error creating interceptor",
+			slog.String("error", err.Error()),
+		)
+		return nil, err
+	}
 	// Register the connectRPC handler with CORS for local development
-	path, handler := filesv1connect.NewFileServiceHandler(fileService)
+	path, handler := filesv1connect.NewFileServiceHandler(
+		fileService,
+		connect.WithInterceptors(
+			validateInterceptor,
+		),
+	)
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:8081"},
@@ -47,7 +61,7 @@ func NewServer(storage storage.Interface, addr string) *Server {
 	return &Server{
 		mux:    mux,
 		server: server,
-	}
+	}, nil
 }
 
 // Start starts the HTTP server

@@ -70,7 +70,10 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	// Create HTTP API server
 	httpAddr := fmt.Sprintf("%s:%d", conf.HTTP.Host, conf.HTTP.Port)
-	apiServer := api.NewServer(store, httpAddr)
+	apiServer, err := api.NewServer(store, httpAddr)
+	if err != nil {
+		return fmt.Errorf("misconfigured api server: %w", err)
+	}
 
 	var g run.Group
 
