@@ -19,19 +19,21 @@ func newLSCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:  "ls",
 		Long: "list directory entries",
-		RunE: ls,
+		Run:  ls,
 	}
 }
 
-func ls(cmd *cobra.Command, args []string) error {
+func ls(cmd *cobra.Command, args []string) {
 	conf, err := config.LoadClient()
 	if err != nil {
-		return err
+		fmt.Println("failed to load client config")
+		return
 	}
 
 	c, err := client.New(*conf)
 	if err != nil {
-		return err
+		fmt.Println("failed to initialize client")
+		return
 	}
 
 	var path string
@@ -48,7 +50,8 @@ func ls(cmd *cobra.Command, args []string) error {
 		}),
 	)
 	if err != nil {
-		return fmt.Errorf("failed to make request: %w", err)
+		fmt.Println("failed to make request")
+		return
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
@@ -61,6 +64,9 @@ func ls(cmd *cobra.Command, args []string) error {
 		fmt.Fprintln(w, row)
 	}
 
-	w.Flush()
-	return nil
+	err = w.Flush()
+	if err != nil {
+		fmt.Println("failed to write table")
+	}
+	return
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 	"net/http"
+	"time"
 
 	"connectrpc.com/connect"
 	connectcors "connectrpc.com/cors"
@@ -62,8 +63,9 @@ func NewServer(
 	slog.Debug("API: ConnectRPC handler registered with CORS", "path", path)
 
 	server := &http.Server{
-		Addr:    addr,
-		Handler: corsMiddleware.Handler(mux),
+		Addr:              addr,
+		Handler:           corsMiddleware.Handler(mux),
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	slog.Info("API: Server created successfully", "addr", addr)
