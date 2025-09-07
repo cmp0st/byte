@@ -15,6 +15,7 @@ import (
 	"github.com/cmp0st/byte/internal/api"
 	"github.com/cmp0st/byte/internal/config"
 	"github.com/cmp0st/byte/internal/key"
+	"github.com/cmp0st/byte/internal/logging"
 	"github.com/cmp0st/byte/internal/sftp"
 	"github.com/cmp0st/byte/internal/storage"
 	oklogrun "github.com/oklog/run"
@@ -44,23 +45,8 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var level slog.Level
-	switch conf.LogLevel {
-	case "DEBUG":
-		level = slog.LevelDebug
-	case "INFO":
-		level = slog.LevelInfo
-	case "WARN":
-		level = slog.LevelWarn
-	case "ERROR":
-		level = slog.LevelError
-	}
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: level,
-	}))
-	slog.SetDefault(logger)
-
-	slog.Info("Configuration loaded successfully")
+	logger := logging.NewFromConfig(*conf)
+	logger.Info("Configuration loaded successfully")
 
 	store, err := storage.NewFromConfig(conf.Storage)
 	if err != nil {
@@ -79,7 +65,12 @@ func run(cmd *cobra.Command, args []string) error {
 
 	// Create HTTP API server
 	httpAddr := fmt.Sprintf("%s:%d", conf.HTTP.Host, conf.HTTP.Port)
-	apiServer, err := api.NewServer(store, *keychain, httpAddr)
+	apiServer, err := api.NewServer(
+		store,
+		*keychain,
+		logger,
+		httpAddr,
+	)
 	if err != nil {
 		return fmt.Errorf("misconfigured api server: %w", err)
 	}

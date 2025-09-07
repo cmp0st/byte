@@ -9,6 +9,7 @@ func NewCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(newRunCommand())
+	cmd.AddCommand(newNewDeviceCommand())
 
 	return cmd
 }

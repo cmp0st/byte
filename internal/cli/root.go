@@ -13,6 +13,7 @@ func New() *cobra.Command {
 	}
 
 	cmd.AddCommand(server.NewCommand())
+	cmd.AddCommand(newLSCommand())
 
 	return cmd
 }

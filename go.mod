@@ -12,6 +12,7 @@ require (
 	github.com/charmbracelet/ssh v0.0.0-20250128164007-98fd5ae11894
 	github.com/charmbracelet/wish v1.4.7
 	github.com/fclairamb/afero-s3 v0.3.1
+	github.com/google/uuid v1.6.0
 	github.com/oklog/run v1.2.0
 	github.com/pkg/sftp v1.13.9
 	github.com/rs/cors v1.11.1

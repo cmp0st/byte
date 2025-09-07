@@ -9,7 +9,7 @@ import (
 type Client struct {
 	ID        string
 	Secret    string
-	ServerURL string
+	ServerURL string `mapstructure:"server_url" yaml:"server_url"`
 }
 
 func LoadClient() (*Client, error) {
@@ -23,7 +23,7 @@ func LoadClient() (*Client, error) {
 	v.SetConfigType("yaml")
 
 	// Search paths
-	v.AddConfigPath("~/.byte/")
+	v.AddConfigPath("$HOME/.byte/")
 
 	// Try to read config file
 	if err := v.ReadInConfig(); err != nil {

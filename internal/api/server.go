@@ -10,6 +10,7 @@ import (
 	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
 	"github.com/cmp0st/byte/internal/auth"
 	"github.com/cmp0st/byte/internal/key"
+	"github.com/cmp0st/byte/internal/logging"
 	"github.com/cmp0st/byte/internal/storage"
 	"github.com/rs/cors"
 )
@@ -21,14 +22,18 @@ type Server struct {
 }
 
 // NewServer creates a new API server
-func NewServer(storage storage.Interface, chain key.ServerChain, addr string) (*Server, error) {
-	slog.Debug("API: Creating new server", "addr", addr)
+func NewServer(
+	storage storage.Interface,
+	chain key.ServerChain,
+	logger *slog.Logger,
+	addr string,
+) (*Server, error) {
+	logger.Debug("API: Creating new server", "addr", addr)
 
 	mux := http.NewServeMux()
 
 	// Create the file service
 	fileService := NewFileService(storage)
-	slog.Debug("API: File service created")
 
 	validateInterceptor, err := validate.NewInterceptor()
 	if err != nil {
@@ -41,6 +46,7 @@ func NewServer(storage storage.Interface, chain key.ServerChain, addr string) (*
 	path, handler := filesv1connect.NewFileServiceHandler(
 		fileService,
 		connect.WithInterceptors(
+			logging.NewInterceptor(logger),
 			auth.NewServerInterceptor(chain),
 			validateInterceptor,
 		),

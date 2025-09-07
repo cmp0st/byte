@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
 	"aidanwoods.dev/go-paseto"
 	"connectrpc.com/connect"
 	"github.com/cmp0st/byte/internal/key"
+	"github.com/cmp0st/byte/internal/logging"
 )
 
 func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
@@ -41,13 +43,16 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			// Server implementation
+			logger := logging.FromContext(ctx)
+
 			tokenStr, found := strings.CutPrefix(req.Header().Get(`Authorization`), "Bearer ")
 			if !found {
+				logger.ErrorContext(ctx, "missing authorization header")
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New(`unauthenticated`))
 			}
 			clientID := req.Header().Get(`Client-ID`)
 			if clientID == "" {
+				logger.ErrorContext(ctx, "missing client id header")
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New(`unauthenticated`))
 			}
 
@@ -55,11 +60,13 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 
 			clientChain, err := chain.ClientChain(clientID)
 			if err != nil {
+				logger.ErrorContext(ctx, "failed to load client chain", slog.Any("err", err))
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New(`unauthenticated`))
 			}
 
 			tokenKey, err := clientChain.TokenKey()
 			if err != nil {
+				logger.ErrorContext(ctx, "failed to derive client token key", slog.Any("err", err))
 				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("unauthenticated"))
 			}
 

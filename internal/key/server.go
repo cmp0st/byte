@@ -36,7 +36,9 @@ func (c ServerChain) ClientChain(clientID string) (*ClientChain, error) {
 		return nil, fmt.Errorf("failed to derive ssh host private key: %w", err)
 	}
 
-	var out ClientChain
+	out := ClientChain{
+		ClientID: clientID,
+	}
 	n := copy(out.Seed[:], clientSeed)
 	if n != 32 {
 		return nil, errors.New("size of client derived seed not 32")
