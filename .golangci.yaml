@@ -2,47 +2,13 @@ version: 2
 linters:
   default: all
   disable:
-  - arangolint
-  - asasalint
-  - asciicheck
-  - bidichk
-  - bodyclose
-  - canonicalheader
-  - containedctx
-  - contextcheck
-  - copyloopvar
-  - cyclop
-  - decorder
-  - depguard
-  - dogsled
-  - dupl
-  - dupword
-  - durationcheck
-  - embeddedstructfieldcheck
-  - err113
-  - errcheck
-  - errchkjson
-  - errname
-  - errorlint
-  - exhaustive
-  - exhaustruct
-  - exptostd
-  - fatcontext
-  - forbidigo
-  - forcetypeassert
-  - funcorder
-  - funlen
-  - ginkgolinter
-  - gocheckcompilerdirectives
-  - gochecknoglobals
-  - gochecknoinits
-  - gochecksumtype
-  - gocognit
-  - goconst
-  - gocritic
-  - gocyclo
-  - godot
-  - godox
+  - cyclop # max 10 is a bit too low imo. Maybe increase the limit and enable eventually
+  - depguard # Maintaining the depguard rules is tedious
+  - err113 # Eh, dynamic errors aren't the end of the world
+  - exhaustruct # Disagree that you should be setting _every_ struct field
+  - forbidigo # This is a CLI application. We're going to print things!
+  - funlen # 60 lines feels too restrictive as a limit on function length
+  - godox # TODO is fine. shush
   - goheader
   - gomoddirectives
   - gomodguard

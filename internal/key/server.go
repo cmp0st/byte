@@ -17,6 +17,10 @@ type ServerChain struct {
 }
 
 func NewServerChain(rawSeed []byte) (*ServerChain, error) {
+	if len(rawSeed) < 32 {
+		return nil, errors.New("server root seed must be at least 32 bytes")
+	}
+
 	seed, err := hkdf.Key(sha256.New, rawSeed, nil, "server.root.v1", 32)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive ssh host private key: %w", err)

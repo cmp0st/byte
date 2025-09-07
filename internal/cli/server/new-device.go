@@ -21,7 +21,7 @@ func newNewDeviceCommand() *cobra.Command {
 func newDevice(cmd *cobra.Command, args []string) error {
 	conf, err := config.LoadServer()
 	if err != nil {
-		return fmt.Errorf("Failed to load config: %v", err)
+		return fmt.Errorf("Failed to load config: %w", err)
 	}
 
 	if conf.Secret == "" || len(conf.Secret) < 32 {

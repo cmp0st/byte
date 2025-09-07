@@ -16,19 +16,19 @@ import (
 	"github.com/cmp0st/byte/internal/storage"
 )
 
-// FileService implements the files v1 service
+// FileService implements the files v1 service.
 type FileService struct {
 	storage storage.Interface
 }
 
-// NewFileService creates a new file service
+// NewFileService creates a new file service.
 func NewFileService(storage storage.Interface) filesv1connect.FileServiceHandler {
 	return &FileService{
 		storage: storage,
 	}
 }
 
-// ListDirectory lists the contents of a directory
+// ListDirectory lists the contents of a directory.
 func (s *FileService) ListDirectory(
 	ctx context.Context,
 	req *connect.Request[filesv1.ListDirectoryRequest],

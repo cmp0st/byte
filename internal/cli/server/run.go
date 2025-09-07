@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -33,11 +32,7 @@ func newRunCommand() *cobra.Command {
 func run(cmd *cobra.Command, args []string) error {
 	conf, err := config.LoadServer()
 	if err != nil {
-		return fmt.Errorf("Failed to load config: %v", err)
-	}
-
-	if conf.Secret == "" || len(conf.Secret) < 32 {
-		return fmt.Errorf("invalid server secret, must be more than 32 charactors")
+		return fmt.Errorf("Failed to load config: %w", err)
 	}
 
 	keychain, err := key.NewServerChain([]byte(conf.Secret))
@@ -46,11 +41,9 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	logger := logging.NewFromConfig(*conf)
-	logger.Info("Configuration loaded successfully")
 
 	store, err := storage.NewFromConfig(conf.Storage)
 	if err != nil {
-		slog.Error("failed to load storage backend", "err", err)
 		return err
 	}
 
@@ -59,17 +52,15 @@ func run(cmd *cobra.Command, args []string) error {
 		Storage: store,
 	}, *keychain)
 	if err != nil {
-		slog.Error("Failed to create SSH server", "error", err)
 		return fmt.Errorf("failed to create SSH server: %w", err)
 	}
 
 	// Create HTTP API server
-	httpAddr := fmt.Sprintf("%s:%d", conf.HTTP.Host, conf.HTTP.Port)
 	apiServer, err := api.NewServer(
 		store,
 		*keychain,
 		logger,
-		httpAddr,
+		fmt.Sprintf("%s:%d", conf.HTTP.Host, conf.HTTP.Port),
 	)
 	if err != nil {
 		return fmt.Errorf("misconfigured api server: %w", err)
@@ -78,64 +69,36 @@ func run(cmd *cobra.Command, args []string) error {
 	var g oklogrun.Group
 
 	// Add SFTP server
-	{
-		g.Add(func() error {
-			slog.Info(
-				"Starting SFTP server",
-				"address", fmt.Sprintf("%s:%d", conf.SFTP.Host, conf.SFTP.Port),
-			)
-			if err := sftpServer.ListenAndServe(); err != nil &&
-				!errors.Is(err, ssh.ErrServerClosed) {
-				return fmt.Errorf("SFTP server failed: %w", err)
-			}
-			return nil
-		}, func(error) {
-			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-			defer cancel()
-			if err := sftpServer.Shutdown(ctx); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
-				slog.Error("Failed to shutdown SFTP server gracefully", "error", err)
-			}
-		})
-	}
+	g.Add(sftpServer.ListenAndServe, func(error) {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := sftpServer.Shutdown(ctx); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
+			slog.Error("Failed to shutdown SFTP server gracefully", "error", err)
+		}
+	})
 
 	// Add HTTP API server
-	{
-		g.Add(func() error {
-			slog.Info("Starting HTTP API server", "address", httpAddr)
-			if err := apiServer.Start(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				return fmt.Errorf("HTTP server failed: %w", err)
-			}
-			return nil
-		}, func(error) {
-			if err := apiServer.Stop(); err != nil {
-				slog.Error("Failed to shutdown HTTP server gracefully", "error", err)
-			}
-		})
-	}
+	g.Add(apiServer.Start, func(error) {
+		if err := apiServer.Stop(); err != nil {
+			slog.Error("Failed to shutdown HTTP server gracefully", "error", err)
+		}
+	})
 
 	// Add signal handler
-	{
-		cancelInterrupt := make(chan struct{})
-		g.Add(func() error {
-			c := make(chan os.Signal, 1)
-			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-			select {
-			case sig := <-c:
-				slog.Info("Shutdown signal received", "signal", sig.String())
-				return fmt.Errorf("received signal %s", sig)
-			case <-cancelInterrupt:
-				return nil
-			}
-		}, func(error) {
-			close(cancelInterrupt)
-		})
-	}
+	g.Add(func() error {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case sig := <-c:
+			return fmt.Errorf("received signal %s", sig)
+		}
+	}, func(error) {
+		return
+	})
 
-	slog.Info("Starting services")
 	if err := g.Run(); err != nil {
 		slog.Info("Services stopped", "reason", err.Error())
 	}
 
-	slog.Info("All services stopped successfully")
 	return nil
 }

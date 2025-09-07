@@ -16,13 +16,13 @@ import (
 	"github.com/rs/cors"
 )
 
-// Server wraps the HTTP server for the API
+// Server wraps the HTTP server for the API.
 type Server struct {
 	mux    *http.ServeMux
 	server *http.Server
 }
 
-// NewServer creates a new API server
+// NewServer creates a new API server.
 func NewServer(
 	storage storage.Interface,
 	chain key.ServerChain,
@@ -33,7 +33,7 @@ func NewServer(
 
 	mux := http.NewServeMux()
 
-	// Create the file service
+	// Create the file service.
 	fileService := NewFileService(storage)
 
 	validateInterceptor, err := validate.NewInterceptor()
@@ -75,7 +75,7 @@ func NewServer(
 	}, nil
 }
 
-// Start starts the HTTP server
+// Start starts the HTTP server.
 func (s *Server) Start() error {
 	slog.Info("API: Starting HTTP server", "addr", s.server.Addr)
 	err := s.server.ListenAndServe()
@@ -87,7 +87,7 @@ func (s *Server) Start() error {
 	return err
 }
 
-// Stop stops the HTTP server
+// Stop stops the HTTP server.
 func (s *Server) Stop() error {
 	slog.Info("API: Stopping HTTP server", "addr", s.server.Addr)
 	err := s.server.Close()
@@ -99,7 +99,7 @@ func (s *Server) Stop() error {
 	return err
 }
 
-// GetAddr returns the server address
+// GetAddr returns the server address.
 func (s *Server) GetAddr() string {
 	return s.server.Addr
 }

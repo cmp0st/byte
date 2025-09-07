@@ -55,13 +55,21 @@ func ls(cmd *cobra.Command, args []string) {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
-	fmt.Fprintln(w, "Last Modified\tSize\tFile")
+	_, err = fmt.Fprintln(w, "Last Modified\tSize\tFile")
+	if err != nil {
+		fmt.Println("failed to write table header")
+		return
+	}
 	for _, entry := range resp.Msg.Entries {
 		mod := entry.ModifiedTime.AsTime().Format(time.RFC3339)
 		size := strconv.Itoa(int(entry.Size))
 		name := entry.Name
 		row := strings.Join([]string{mod, size, name}, "\t")
-		fmt.Fprintln(w, row)
+		_, err = fmt.Fprintln(w, row)
+		if err != nil {
+			fmt.Println("failed to write table rows")
+			return
+		}
 	}
 
 	err = w.Flush()
