@@ -1,10 +1,7 @@
 package cli
 
 import (
-	"encoding/base64"
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -13,10 +10,8 @@ import (
 
 	"connectrpc.com/connect"
 	filesv1 "github.com/cmp0st/byte/gen/files/v1"
-	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
-	"github.com/cmp0st/byte/internal/auth"
+	"github.com/cmp0st/byte/internal/client"
 	"github.com/cmp0st/byte/internal/config"
-	"github.com/cmp0st/byte/internal/key"
 	"github.com/spf13/cobra"
 )
 
@@ -34,25 +29,10 @@ func ls(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	rawKey, err := base64.StdEncoding.DecodeString(conf.Secret)
+	c, err := client.New(*conf)
 	if err != nil {
 		return err
 	}
-
-	var keychain key.ClientChain
-	keychain.ClientID = conf.ID
-	n := copy(keychain.Seed[:], rawKey)
-	if n != 32 {
-		return errors.New("bad client key")
-	}
-
-	client := filesv1connect.NewFileServiceClient(
-		http.DefaultClient,
-		conf.ServerURL,
-		connect.WithInterceptors(
-			auth.NewClientInterceptor(keychain),
-		),
-	)
 
 	var path string
 	if len(args) == 0 {
@@ -61,7 +41,7 @@ func ls(cmd *cobra.Command, args []string) error {
 		path = args[0]
 	}
 
-	resp, err := client.ListDirectory(
+	resp, err := c.ListDirectory(
 		cmd.Context(),
 		connect.NewRequest(&filesv1.ListDirectoryRequest{
 			Path: path,
