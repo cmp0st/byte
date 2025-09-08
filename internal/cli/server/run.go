@@ -43,6 +43,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	logger := logging.NewFromConfig(*conf)
+	ctx := logging.ContextWith(cmd.Context(), logger)
 
 	store, err := storage.NewFromConfig(conf.Storage)
 	if err != nil {
@@ -50,9 +51,12 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create SFTP server
-	sftpServer, err := sftp.NewServer(conf.SFTP, &sftp.Handlers{
-		Storage: store,
-	}, *keychain)
+	sftpServer, err := sftp.NewServer(
+		ctx,
+		conf.SFTP,
+		store,
+		*keychain,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to create SSH server: %w", err)
 	}
