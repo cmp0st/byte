@@ -12,6 +12,7 @@ func FromContext(ctx context.Context) *slog.Logger {
 	if !ok {
 		return slog.Default()
 	}
+
 	return logger
 }
 

@@ -48,6 +48,7 @@ func (s *FileService) ListDirectory(
 			"error", err,
 			"duration", time.Since(start),
 		)
+
 		return nil, connect.NewError(
 			connect.CodeNotFound,
 			fmt.Errorf("failed to list directory: %w", err),

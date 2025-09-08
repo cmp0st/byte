@@ -45,9 +45,11 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 			tokenStr := token.V4Encrypt(*tokenKey, []byte(chain.ClientID))
 			req.Header().Set("Authorization", "Bearer "+tokenStr)
 			req.Header().Set("Client-ID", chain.ClientID)
+
 			return next(ctx, req)
 		})
 	}
+
 	return connect.UnaryInterceptorFunc(interceptor)
 }
 
@@ -62,6 +64,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			tokenStr, found := strings.CutPrefix(req.Header().Get(`Authorization`), "Bearer ")
 			if !found {
 				logger.ErrorContext(ctx, "missing authorization header")
+
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
 					errors.New(`unauthenticated`),
@@ -70,6 +73,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			clientID := req.Header().Get(`Client-ID`)
 			if clientID == "" {
 				logger.ErrorContext(ctx, "missing client id header")
+
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
 					errors.New(`unauthenticated`),
@@ -81,6 +85,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			clientChain, err := chain.ClientChain(clientID)
 			if err != nil {
 				logger.ErrorContext(ctx, "failed to load client chain", slog.Any("err", err))
+
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
 					errors.New(`unauthenticated`),
@@ -90,6 +95,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			tokenKey, err := clientChain.TokenKey()
 			if err != nil {
 				logger.ErrorContext(ctx, "failed to derive client token key", slog.Any("err", err))
+
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
 					errors.New("unauthenticated"),
@@ -112,5 +118,6 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			return next(ctx, req)
 		})
 	}
+
 	return connect.UnaryInterceptorFunc(interceptor)
 }

@@ -22,6 +22,8 @@ func NewFromConfig(conf config.Server) *slog.Logger {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: level,
 	}))
+
 	slog.SetDefault(logger)
+
 	return logger
 }

@@ -43,6 +43,7 @@ func NewServer(
 		slog.Error("error creating interceptor",
 			slog.String("error", err.Error()),
 		)
+
 		return nil, err
 	}
 	// Register the connectRPC handler with CORS for local development
@@ -71,6 +72,7 @@ func NewServer(
 	}
 
 	slog.Info("API: Server created successfully", "addr", addr)
+
 	return &Server{
 		mux:    mux,
 		server: server,
@@ -86,6 +88,7 @@ func (s *Server) Start() error {
 	} else {
 		slog.Info("API: HTTP server stopped gracefully", "addr", s.server.Addr)
 	}
+
 	return err
 }
 
@@ -98,6 +101,7 @@ func (s *Server) Stop() error {
 	} else {
 		slog.Info("API: HTTP server stopped successfully", "addr", s.server.Addr)
 	}
+
 	return err
 }
 

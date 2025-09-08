@@ -29,6 +29,7 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 			"key_type", keyType,
 			"fingerprint", keyFingerprint,
 		)
+
 		return false
 	}
 
@@ -38,12 +39,14 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 		parts := strings.Fields(authKey)
 		if len(parts) < SSHKeyMinFields {
 			slog.Debug("Skipping malformed authorized key", "index", i)
+
 			continue
 		}
 
 		parsedKey, _, _, _, err := gossh.ParseAuthorizedKey([]byte(authKey))
 		if err != nil {
 			slog.Debug("Failed to parse authorized key", "index", i, "error", err)
+
 			continue
 		}
 
@@ -55,6 +58,7 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 				"fingerprint",
 				keyFingerprint,
 			)
+
 			return true
 		}
 	}
@@ -66,6 +70,7 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 		"fingerprint",
 		keyFingerprint,
 	)
+
 	return false
 }
 

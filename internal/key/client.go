@@ -82,5 +82,6 @@ func (c ClientChain) TokenKey() (*paseto.V4SymmetricKey, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &tokenKey, nil
 }

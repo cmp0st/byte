@@ -25,10 +25,12 @@ func (s *Handlers) Fileread(r *sftp.Request) (io.ReaderAt, error) {
 	file, err := s.Storage.Open(r.Filepath)
 	if err != nil {
 		slog.Error("Failed to open file for reading", "path", r.Filepath, "error", err)
+
 		return nil, sftpErrFromPathError(err)
 	}
 
 	slog.Info("File opened for reading", "path", r.Filepath)
+
 	return file, nil
 }
 
@@ -72,8 +74,10 @@ func (s *Handlers) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 			"flags", r.Flags,
 			"error", err,
 		)
+
 		return nil, sftpErrFromPathError(err)
 	}
+
 	return file, nil
 }
 
@@ -89,6 +93,7 @@ func (s *Handlers) Filecmd(r *sftp.Request) error {
 		} else {
 			slog.Info("File removed", "path", r.Filepath)
 		}
+
 		return sftpErrFromPathError(err)
 	case "Mkdir":
 		err = s.Storage.Mkdir(r.Filepath, DefaultDirectoryPerms)
@@ -97,6 +102,7 @@ func (s *Handlers) Filecmd(r *sftp.Request) error {
 		} else {
 			slog.Info("Directory created", "path", r.Filepath)
 		}
+
 		return sftpErrFromPathError(err)
 	case "Rmdir":
 		err = s.Storage.Remove(r.Filepath)
@@ -105,6 +111,7 @@ func (s *Handlers) Filecmd(r *sftp.Request) error {
 		} else {
 			slog.Info("Directory removed", "path", r.Filepath)
 		}
+
 		return sftpErrFromPathError(err)
 	case "Rename":
 		err = s.Storage.Rename(r.Filepath, r.Target)
@@ -113,12 +120,15 @@ func (s *Handlers) Filecmd(r *sftp.Request) error {
 		} else {
 			slog.Info("File renamed", "from", r.Filepath, "to", r.Target)
 		}
+
 		return sftpErrFromPathError(err)
 	case "Setstat":
 		slog.Debug("Setstat operation (no-op)", "path", r.Filepath)
+
 		return nil
 	default:
 		slog.Warn("Unsupported SFTP operation", "method", r.Method, "path", r.Filepath)
+
 		return sftp.ErrSSHFxOpUnsupported
 	}
 }
@@ -131,6 +141,7 @@ func (s *Handlers) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
 		entries, err := afero.ReadDir(s.Storage, r.Filepath)
 		if err != nil {
 			slog.Error("Failed to list directory", "path", r.Filepath, "error", err)
+
 			return nil, sftpErrFromPathError(err)
 		}
 		var fileInfos []os.FileInfo
@@ -138,20 +149,25 @@ func (s *Handlers) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
 			fileInfos = append(fileInfos, entry)
 		}
 		slog.Info("Directory listed", "path", r.Filepath, "entries", len(fileInfos))
+
 		return listerat(fileInfos), nil
 	case "Stat":
 		info, err := s.Storage.Stat(r.Filepath)
 		if err != nil {
 			slog.Error("Failed to stat file", "path", r.Filepath, "error", err)
+
 			return nil, sftpErrFromPathError(err)
 		}
 		slog.Debug("File stat", "path", r.Filepath, "size", info.Size(), "mode", info.Mode())
+
 		return listerat([]os.FileInfo{info}), nil
 	case "Readlink":
 		slog.Debug("Readlink operation not supported", "path", r.Filepath)
+
 		return nil, sftp.ErrSSHFxOpUnsupported
 	default:
 		slog.Warn("Unsupported file list operation", "method", r.Method, "path", r.Filepath)
+
 		return nil, sftp.ErrSSHFxOpUnsupported
 	}
 }
@@ -166,6 +182,7 @@ func (f listerat) ListAt(ls []os.FileInfo, offset int64) (int, error) {
 	if n < len(ls) {
 		return n, io.EOF
 	}
+
 	return n, nil
 }
 
@@ -179,5 +196,6 @@ func sftpErrFromPathError(err error) error {
 	if os.IsPermission(err) {
 		return sftp.ErrSSHFxPermissionDenied
 	}
+
 	return err
 }

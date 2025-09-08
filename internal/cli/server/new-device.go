@@ -45,5 +45,6 @@ func newDevice(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("client id: ", clientID.String())
 	fmt.Println("client secret: ", base64.StdEncoding.EncodeToString(clientKeyChain.Seed[:]))
+
 	return nil
 }

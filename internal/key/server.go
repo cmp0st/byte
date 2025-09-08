@@ -55,6 +55,7 @@ func NewServerChain(rawSeed []byte) (*ServerChain, error) {
 	if n != ServerRootKeySize {
 		return nil, ErrServerRootKeyDerivation
 	}
+
 	return &c, nil
 }
 
@@ -84,6 +85,7 @@ func (c ServerChain) SSHHostKey() (ed25519.PrivateKey, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive ssh host private key: %w", err)
 	}
+
 	return ed25519.NewKeyFromSeed(keyseed), nil
 }
 
@@ -103,5 +105,6 @@ func ToPEM(key crypto.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to PEM encode private key: %w", err)
 	}
+
 	return buf.Bytes(), nil
 }

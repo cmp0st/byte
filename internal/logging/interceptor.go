@@ -31,11 +31,14 @@ func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 				requestLogger.ErrorContext(ctx, "request failed",
 					slog.Any("err", err),
 				)
+
 				return res, err
 			}
 			requestLogger.InfoContext(ctx, "request succeeded")
+
 			return res, nil
 		})
 	}
+
 	return connect.UnaryInterceptorFunc(interceptor)
 }

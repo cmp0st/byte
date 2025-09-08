@@ -27,12 +27,14 @@ func ls(cmd *cobra.Command, args []string) {
 	conf, err := config.LoadClient()
 	if err != nil {
 		fmt.Println("failed to load client config")
+
 		return
 	}
 
 	c, err := client.New(*conf)
 	if err != nil {
 		fmt.Println("failed to initialize client")
+
 		return
 	}
 
@@ -51,6 +53,7 @@ func ls(cmd *cobra.Command, args []string) {
 	)
 	if err != nil {
 		fmt.Println("failed to make request")
+
 		return
 	}
 
@@ -58,6 +61,7 @@ func ls(cmd *cobra.Command, args []string) {
 	_, err = fmt.Fprintln(w, "Last Modified\tSize\tFile")
 	if err != nil {
 		fmt.Println("failed to write table header")
+
 		return
 	}
 	for _, entry := range resp.Msg.Entries {
@@ -68,6 +72,7 @@ func ls(cmd *cobra.Command, args []string) {
 		_, err = fmt.Fprintln(w, row)
 		if err != nil {
 			fmt.Println("failed to write table rows")
+
 			return
 		}
 	}
@@ -76,5 +81,6 @@ func ls(cmd *cobra.Command, args []string) {
 	if err != nil {
 		fmt.Println("failed to write table")
 	}
+
 	return
 }

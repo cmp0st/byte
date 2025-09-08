@@ -8,10 +8,8 @@ require (
 	connectrpc.com/connect v1.18.1
 	connectrpc.com/cors v0.1.0
 	connectrpc.com/validate v0.3.0
-	github.com/aws/aws-sdk-go v1.55.8
 	github.com/charmbracelet/ssh v0.0.0-20250128164007-98fd5ae11894
 	github.com/charmbracelet/wish v1.4.7
-	github.com/fclairamb/afero-s3 v0.3.1
 	github.com/google/uuid v1.6.0
 	github.com/oklog/run v1.2.0
 	github.com/pkg/sftp v1.13.9
@@ -48,7 +46,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/google/cel-go v0.25.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
