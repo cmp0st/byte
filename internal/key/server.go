@@ -12,47 +12,75 @@ import (
 	"fmt"
 )
 
+const (
+	// This raw input is user provided configuration.
+	ServerRawInputKeyMinimumSize = 32
+
+	// NB: This key isn't actively used for cryptography. Its only used to derive other sub keys.
+	ServerRootKeySize            = 32
+	ServerRootKeyDomainSeparator = `server.root.v1`
+
+	// Size of Ed25519 private key.
+	ServerSSHHostKeySize            = 32
+	ServerSSHHostKeyDomainSeparator = `server.ssh.host-key.v1`
+)
+
+var (
+	ErrInvalidServerRawInputKey = errors.New("invalid server raw input seed")
+	ErrServerRootKeyDerivation  = errors.New("failed to derive server root key")
+)
+
 type ServerChain struct {
-	Seed [32]byte
+	Seed [ServerRootKeySize]byte
 }
 
 func NewServerChain(rawSeed []byte) (*ServerChain, error) {
-	if len(rawSeed) < 32 {
-		return nil, errors.New("server root seed must be at least 32 bytes")
+	if len(rawSeed) < ServerRawInputKeyMinimumSize {
+		return nil, ErrInvalidServerRawInputKey
 	}
 
-	seed, err := hkdf.Key(sha256.New, rawSeed, nil, "server.root.v1", 32)
+	seed, err := hkdf.Key(
+		sha256.New,
+		rawSeed,
+		nil,
+		string(ServerRootKeyDomainSeparator),
+		int(ServerRootKeySize),
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to derive ssh host private key: %w", err)
+		return nil, ErrServerRootKeyDerivation
 	}
 
 	var c ServerChain
 	n := copy(c.Seed[:], seed)
-	if n != 32 {
-		return nil, errors.New("size of derived seed not 32")
+	if n != ServerRootKeySize {
+		return nil, ErrServerRootKeyDerivation
 	}
 	return &c, nil
 }
 
 func (c ServerChain) ClientChain(clientID string) (*ClientChain, error) {
-	clientSeed, err := hkdf.Key(sha256.New, c.Seed[:], nil, "client.root.v1."+clientID, 32)
+	clientSeed, err := hkdf.Key(
+		sha256.New,
+		c.Seed[:],
+		nil,
+		"client.root.v1."+clientID,
+		int(ClientRootKeySize),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive ssh host private key: %w", err)
 	}
 
-	out := ClientChain{
-		ClientID: clientID,
-	}
-	n := copy(out.Seed[:], clientSeed)
-	if n != 32 {
-		return nil, errors.New("size of client derived seed not 32")
-	}
-
-	return &out, nil
+	return NewClientChain(clientSeed, clientID)
 }
 
 func (c ServerChain) SSHHostKey() (ed25519.PrivateKey, error) {
-	keyseed, err := hkdf.Key(sha256.New, c.Seed[:], nil, "server.ssh.host-key.v1", 32)
+	keyseed, err := hkdf.Key(
+		sha256.New,
+		c.Seed[:],
+		nil,
+		string(ServerSSHHostKeyDomainSeparator),
+		int(ServerSSHHostKeySize),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to derive ssh host private key: %w", err)
 	}

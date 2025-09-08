@@ -29,6 +29,8 @@ func newRunCommand() *cobra.Command {
 	}
 }
 
+const DefaultShutdownGracePeriod = 30 * time.Second
+
 func run(cmd *cobra.Command, args []string) error {
 	conf, err := config.LoadServer()
 	if err != nil {
@@ -70,7 +72,10 @@ func run(cmd *cobra.Command, args []string) error {
 
 	// Add SFTP server
 	g.Add(sftpServer.ListenAndServe, func(error) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(
+			context.Background(),
+			DefaultShutdownGracePeriod,
+		)
 		defer cancel()
 		if err := sftpServer.Shutdown(ctx); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 			slog.Error("Failed to shutdown SFTP server gracefully", "error", err)

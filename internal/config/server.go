@@ -48,14 +48,19 @@ type S3 struct {
 	UseSSL    *bool  `mapstructure:"use_ssl"    yaml:"use_ssl"`
 }
 
+const (
+	DefaultHTTPPort = 8080
+	DefaultSSHPort  = 8022
+)
+
 func LoadServer() (*Server, error) {
 	v := viper.New()
 
 	// Set defaults
 	v.SetDefault("sftp.host", "localhost")
-	v.SetDefault("sftp.port", 2222)
+	v.SetDefault("sftp.port", DefaultSSHPort)
 	v.SetDefault("http.host", "localhost")
-	v.SetDefault("http.port", 8080)
+	v.SetDefault("http.port", DefaultHTTPPort)
 	v.SetDefault("posix.root", "./data")
 
 	// Config file settings

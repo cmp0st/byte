@@ -13,6 +13,12 @@ import (
 	gossh "golang.org/x/crypto/ssh"
 )
 
+const (
+	// At a mininum an SSH key has the key type and key value fields and then optionally
+	// the host.
+	SSHKeyMinFields = 2
+)
+
 func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 	keyType := key.Type()
 	keyFingerprint := gossh.FingerprintSHA256(key)
@@ -30,7 +36,7 @@ func isAuthorizedKey(authorizedKeys []string, key ssh.PublicKey) bool {
 
 	for i, authKey := range authorizedKeys {
 		parts := strings.Fields(authKey)
-		if len(parts) < 2 {
+		if len(parts) < SSHKeyMinFields {
 			slog.Debug("Skipping malformed authorized key", "index", i)
 			continue
 		}

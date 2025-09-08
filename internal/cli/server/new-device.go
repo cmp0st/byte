@@ -25,7 +25,7 @@ func newDevice(cmd *cobra.Command, args []string) error {
 	}
 
 	if conf.Secret == "" || len(conf.Secret) < 32 {
-		return fmt.Errorf("invalid server secret, must be more than 32 charactors")
+		return fmt.Errorf("invalid server secret, must be more than 32 characters")
 	}
 
 	keychain, err := key.NewServerChain([]byte(conf.Secret))

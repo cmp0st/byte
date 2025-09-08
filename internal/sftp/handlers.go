@@ -10,6 +10,11 @@ import (
 	"github.com/spf13/afero"
 )
 
+const (
+	DefaultDirectoryPerms = 0o700
+	DefaultFilePerms      = 0600
+)
+
 type Handlers struct {
 	Storage storage.Interface
 }
@@ -59,7 +64,7 @@ func (s *Handlers) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 	}
 
 	// First try to open the file normally
-	file, err := s.Storage.OpenFile(r.Filepath, flags, 0644)
+	file, err := s.Storage.OpenFile(r.Filepath, flags, DefaultFilePerms)
 	if err != nil {
 		slog.Error(
 			"Failed to open file for writing",
@@ -86,7 +91,7 @@ func (s *Handlers) Filecmd(r *sftp.Request) error {
 		}
 		return sftpErrFromPathError(err)
 	case "Mkdir":
-		err = s.Storage.Mkdir(r.Filepath, 0755)
+		err = s.Storage.Mkdir(r.Filepath, DefaultDirectoryPerms)
 		if err != nil {
 			slog.Error("Failed to create directory", "path", r.Filepath, "error", err)
 		} else {

@@ -14,6 +14,11 @@ import (
 	"github.com/cmp0st/byte/internal/logging"
 )
 
+// NB: Tokens are minted per-rpc request so we have very short
+// expiration per token to mitigate replay attacks in the case of a
+// token leak.
+const DefaultTokenExpiration = 30 * time.Second
+
 func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(
@@ -25,7 +30,7 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 				return nil, errors.New("cannot use client auth interceptor on server")
 			}
 			token := paseto.NewToken()
-			token.SetExpiration(time.Now().Add(30 * time.Second))
+			token.SetExpiration(time.Now().Add(DefaultTokenExpiration))
 			token.SetIssuedAt(time.Now())
 			token.SetNotBefore(time.Now())
 

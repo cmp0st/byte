@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/base64"
-	"errors"
 	"net/http"
 
 	"connectrpc.com/connect"
@@ -18,11 +17,9 @@ func New(c config.Client) (filesv1connect.FileServiceClient, error) {
 		return nil, err
 	}
 
-	var keychain key.ClientChain
-	keychain.ClientID = c.ID
-	n := copy(keychain.Seed[:], rawKey)
-	if n != 32 {
-		return nil, errors.New("bad client key")
+	keychain, err := key.NewClientChain(rawKey, c.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	return filesv1connect.NewFileServiceClient(
@@ -30,7 +27,7 @@ func New(c config.Client) (filesv1connect.FileServiceClient, error) {
 		c.ServerURL,
 		connect.WithGRPC(),
 		connect.WithInterceptors(
-			auth.NewClientInterceptor(keychain),
+			auth.NewClientInterceptor(*keychain),
 		),
 	), nil
 }

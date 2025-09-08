@@ -16,6 +16,8 @@ import (
 	"github.com/rs/cors"
 )
 
+const DefaultReadHeaderTimeout = 10 * time.Second
+
 // Server wraps the HTTP server for the API.
 type Server struct {
 	mux    *http.ServeMux
@@ -65,7 +67,7 @@ func NewServer(
 	server := &http.Server{
 		Addr:              addr,
 		Handler:           corsMiddleware.Handler(mux),
-		ReadHeaderTimeout: 10 * time.Second,
+		ReadHeaderTimeout: DefaultReadHeaderTimeout,
 	}
 
 	slog.Info("API: Server created successfully", "addr", addr)
