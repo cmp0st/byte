@@ -38,6 +38,7 @@ func (s *Handlers) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 	slog.Debug("SFTP file write", "method", "Filewrite", "path", r.Filepath, "flags", r.Flags)
 
 	var flags int
+
 	pflags := r.Pflags()
 	if pflags.Write {
 		if pflags.Read {
@@ -52,15 +53,19 @@ func (s *Handlers) Filewrite(r *sftp.Request) (io.WriterAt, error) {
 	if pflags.Creat {
 		flags |= os.O_CREATE
 	}
+
 	if pflags.Append {
 		flags |= os.O_APPEND
 	}
+
 	if pflags.Read {
 		flags |= os.O_RDONLY
 	}
+
 	if pflags.Trunc {
 		flags |= os.O_TRUNC
 	}
+
 	if pflags.Excl {
 		flags |= os.O_EXCL
 	}
@@ -85,6 +90,7 @@ func (s *Handlers) Filecmd(r *sftp.Request) error {
 	slog.Debug("SFTP file command", "method", r.Method, "path", r.Filepath, "target", r.Target)
 
 	var err error
+
 	switch r.Method {
 	case "Remove":
 		err = s.Storage.Remove(r.Filepath)
@@ -144,13 +150,14 @@ func (s *Handlers) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
 
 			return nil, sftpErrFromPathError(err)
 		}
-		var fileInfos []os.FileInfo
-		for _, entry := range entries {
-			fileInfos = append(fileInfos, entry)
-		}
-		slog.Info("Directory listed", "path", r.Filepath, "entries", len(fileInfos))
 
-		return listerat(fileInfos), nil
+		slog.Info(
+			"Directory listed",
+			slog.String("path", r.Filepath),
+			slog.Int("entries", len(entries)),
+		)
+
+		return listerat(entries), nil
 	case "Stat":
 		info, err := s.Storage.Stat(r.Filepath)
 		if err != nil {
@@ -158,15 +165,28 @@ func (s *Handlers) Filelist(r *sftp.Request) (sftp.ListerAt, error) {
 
 			return nil, sftpErrFromPathError(err)
 		}
-		slog.Debug("File stat", "path", r.Filepath, "size", info.Size(), "mode", info.Mode())
+
+		slog.Debug(
+			"File stat",
+			slog.String("path", r.Filepath),
+			slog.Int64("size", info.Size()),
+			slog.Any("mode", info.Mode()),
+		)
 
 		return listerat([]os.FileInfo{info}), nil
 	case "Readlink":
-		slog.Debug("Readlink operation not supported", "path", r.Filepath)
+		slog.Debug(
+			"Readlink operation not supported",
+			slog.String("path", r.Filepath),
+		)
 
 		return nil, sftp.ErrSSHFxOpUnsupported
 	default:
-		slog.Warn("Unsupported file list operation", "method", r.Method, "path", r.Filepath)
+		slog.Warn(
+			"Unsupported file list operation",
+			slog.String("method", r.Method),
+			slog.String("path", r.Filepath),
+		)
 
 		return nil, sftp.ErrSSHFxOpUnsupported
 	}
@@ -178,6 +198,7 @@ func (f listerat) ListAt(ls []os.FileInfo, offset int64) (int, error) {
 	if offset >= int64(len(f)) {
 		return 0, io.EOF
 	}
+
 	n := copy(ls, f[offset:])
 	if n < len(ls) {
 		return n, io.EOF
@@ -190,9 +211,11 @@ func sftpErrFromPathError(err error) error {
 	if err == nil {
 		return nil
 	}
+
 	if os.IsNotExist(err) {
 		return sftp.ErrSSHFxNoSuchFile
 	}
+
 	if os.IsPermission(err) {
 		return sftp.ErrSSHFxPermissionDenied
 	}

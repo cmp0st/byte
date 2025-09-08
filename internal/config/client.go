@@ -9,7 +9,7 @@ import (
 type Client struct {
 	ID        string
 	Secret    string
-	ServerURL string `mapstructure:"server_url" yaml:"server_url"`
+	ServerURL string `mapstructure:"serverUrl" yaml:"serverUrl"`
 }
 
 func LoadClient() (*Client, error) {
@@ -26,12 +26,15 @@ func LoadClient() (*Client, error) {
 	v.AddConfigPath("$HOME/.byte/")
 
 	// Try to read config file
-	if err := v.ReadInConfig(); err != nil {
+	err := v.ReadInConfig()
+	if err != nil {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
 	var cfg Client
-	if err := v.Unmarshal(&cfg); err != nil {
+
+	err = v.Unmarshal(&cfg)
+	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
 

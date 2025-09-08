@@ -9,9 +9,11 @@ import (
 
 func NewFromConfig(c config.Storage) (Interface, error) {
 	var fs Interface
+
 	switch {
 	case c.InMemory != nil:
 		fs = NewInMemory()
+
 		slog.Info("Storage backend initialized", "type", "in-memory")
 	case c.Posix != nil:
 		fs = NewPosix(c.Posix.Root)

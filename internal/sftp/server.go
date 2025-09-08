@@ -79,6 +79,7 @@ func NewServer(c config.SFTP, h *Handlers, k key.ServerChain) (*ssh.Server, erro
 	if err != nil {
 		return nil, err
 	}
+
 	hostKeyPEM, err := key.ToPEM(raw)
 	if err != nil {
 		return nil, err
@@ -94,7 +95,11 @@ func NewServer(c config.SFTP, h *Handlers, k key.ServerChain) (*ssh.Server, erro
 			remoteAddr := sess.RemoteAddr().String()
 			user := sess.User()
 
-			slog.Info("SFTP session started", "user", user, "remote_addr", remoteAddr)
+			slog.Info(
+				"sftp session started",
+				slog.String("user", user),
+				slog.String("remote_addr", remoteAddr),
+			)
 
 			handlers := sftp.Handlers{
 				FileGet:  h,
@@ -104,18 +109,21 @@ func NewServer(c config.SFTP, h *Handlers, k key.ServerChain) (*ssh.Server, erro
 			}
 
 			server := sftp.NewRequestServer(sess, handlers)
-			if err := server.Serve(); err != nil {
+
+			err := server.Serve()
+			if err != nil {
 				slog.Error(
-					"SFTP server error",
-					"error",
-					err,
-					"user",
-					user,
-					"remote_addr",
-					remoteAddr,
+					"sftp server error",
+					slog.Any("err", err),
+					slog.String("user", user),
+					slog.String("remote_addr", remoteAddr),
 				)
 			} else {
-				slog.Info("SFTP session ended", "user", user, "remote_addr", remoteAddr)
+				slog.Info(
+					"SFTP session ended",
+					slog.String("user", user),
+					slog.String("remote_addr", remoteAddr),
+				)
 			}
 		}),
 	)

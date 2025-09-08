@@ -62,6 +62,7 @@ func NewServer(
 		AllowedHeaders: connectcors.AllowedHeaders(),
 		ExposedHeaders: connectcors.ExposedHeaders(),
 	})
+
 	mux.Handle(path, handler)
 	slog.Debug("API: ConnectRPC handler registered with CORS", "path", path)
 
@@ -82,6 +83,7 @@ func NewServer(
 // Start starts the HTTP server.
 func (s *Server) Start() error {
 	slog.Info("API: Starting HTTP server", "addr", s.server.Addr)
+
 	err := s.server.ListenAndServe()
 	if err != nil {
 		slog.Error("API: HTTP server stopped with error", "addr", s.server.Addr, "error", err)
@@ -95,6 +97,7 @@ func (s *Server) Start() error {
 // Stop stops the HTTP server.
 func (s *Server) Stop() error {
 	slog.Info("API: Stopping HTTP server", "addr", s.server.Addr)
+
 	err := s.server.Close()
 	if err != nil {
 		slog.Error("API: Failed to stop HTTP server", "addr", s.server.Addr, "error", err)

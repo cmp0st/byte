@@ -51,6 +51,7 @@ func NewServerChain(rawSeed []byte) (*ServerChain, error) {
 	}
 
 	var c ServerChain
+
 	n := copy(c.Seed[:], seed)
 	if n != ServerRootKeySize {
 		return nil, ErrServerRootKeyDerivation
@@ -101,6 +102,7 @@ func ToPEM(key crypto.PrivateKey) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
+
 	err = pem.Encode(&buf, block)
 	if err != nil {
 		return nil, fmt.Errorf("failed to PEM encode private key: %w", err)

@@ -7,8 +7,8 @@ import (
 )
 
 type Server struct {
-	LogLevel string `mapstructure:"log_level" yaml:"log_level"`
-	Secret   string `mapstructure:"secret"    yaml:"secret"`
+	LogLevel string `mapstructure:"logLevel" yaml:"logLevel"`
+	Secret   string `mapstructure:"secret"   yaml:"secret"`
 
 	SFTP SFTP `mapstructure:"sftp" yaml:"sftp"`
 	HTTP HTTP `mapstructure:"http" yaml:"http"`
@@ -17,9 +17,9 @@ type Server struct {
 }
 
 type SFTP struct {
-	Host           string   `mapstructure:"host"            yaml:"host"`
-	Port           int      `mapstructure:"port"            yaml:"port"`
-	AuthorizedKeys []string `mapstructure:"authorized_keys" yaml:"authorized_keys"`
+	Host           string   `mapstructure:"host"           yaml:"host"`
+	Port           int      `mapstructure:"port"           yaml:"port"`
+	AuthorizedKeys []string `mapstructure:"authorizedKeys" yaml:"authorizedKeys"`
 }
 
 type HTTP struct {
@@ -28,9 +28,8 @@ type HTTP struct {
 }
 
 type Storage struct {
-	Posix    *Posix    `mapstructure:"posix"     yaml:"posix"`
-	InMemory *InMemory `mapstructure:"in_memory" yaml:"in_memory"`
-	S3       *S3       `mapstructure:"s3"        yaml:"s3"`
+	Posix    *Posix    `mapstructure:"posix"    yaml:"posix"`
+	InMemory *InMemory `mapstructure:"inMemory" yaml:"inMemory"`
 }
 
 type Posix struct {
@@ -38,15 +37,6 @@ type Posix struct {
 }
 
 type InMemory struct{}
-
-type S3 struct {
-	Bucket    string `mapstructure:"bucket"     yaml:"bucket"`
-	Region    string `mapstructure:"region"     yaml:"region"`
-	Endpoint  string `mapstructure:"endpoint"   yaml:"endpoint"`
-	AccessKey string `mapstructure:"access_key" yaml:"access_key"`
-	SecretKey string `mapstructure:"secret_key" yaml:"secret_key"`
-	UseSSL    *bool  `mapstructure:"use_ssl"    yaml:"use_ssl"`
-}
 
 const (
 	DefaultHTTPPort = 8080
@@ -72,12 +62,15 @@ func LoadServer() (*Server, error) {
 	v.AddConfigPath(".")
 
 	// Try to read config file
-	if err := v.ReadInConfig(); err != nil {
+	err := v.ReadInConfig()
+	if err != nil {
 		return nil, fmt.Errorf("error reading config file: %w", err)
 	}
 
 	var cfg Server
-	if err := v.Unmarshal(&cfg); err != nil {
+
+	err = v.Unmarshal(&cfg)
+	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling config: %w", err)
 	}
 

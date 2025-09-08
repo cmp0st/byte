@@ -10,28 +10,7 @@ linters:
   - funlen # 60 lines feels too restrictive as a limit on function length
   - godox # TODO is fine. shush
   - ireturn # I disagree with this
-  - noctx
-  - noinlineerr
-  - nolintlint
-  - nonamedreturns
-  - nosprintfhostport
-  - paralleltest
-  - perfsprint
-  - prealloc
-  - predeclared
-  - promlinter
-  - protogetter
-  - reassign
-  - recvcheck
-  - revive
-  - rowserrcheck
-  - sloglint
-  - spancheck
-  - sqlclosecheck
-  - staticcheck
-  - tagalign
-  - tagliatelle
-  - testableexamples
+  - revive # To strict about comment structure
   - testifylint
   - testpackage
   - thelper
@@ -45,9 +24,7 @@ linters:
   - wastedassign
   - whitespace
   - wrapcheck
-  - wsl
-  - wsl_v5
-  - zerologlint
+  - wsl # Deprecated and conflicts with wsl_5
 formatters:
   enable:
   - gofmt

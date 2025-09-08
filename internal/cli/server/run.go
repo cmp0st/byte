@@ -34,7 +34,7 @@ const DefaultShutdownGracePeriod = 30 * time.Second
 func run(cmd *cobra.Command, args []string) error {
 	conf, err := config.LoadServer()
 	if err != nil {
-		return fmt.Errorf("Failed to load config: %w", err)
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	keychain, err := key.NewServerChain([]byte(conf.Secret))
@@ -77,14 +77,17 @@ func run(cmd *cobra.Command, args []string) error {
 			DefaultShutdownGracePeriod,
 		)
 		defer cancel()
-		if err := sftpServer.Shutdown(ctx); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
+
+		err := sftpServer.Shutdown(ctx)
+		if err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 			slog.Error("Failed to shutdown SFTP server gracefully", "error", err)
 		}
 	})
 
 	// Add HTTP API server
 	g.Add(apiServer.Start, func(error) {
-		if err := apiServer.Stop(); err != nil {
+		err := apiServer.Stop()
+		if err != nil {
 			slog.Error("Failed to shutdown HTTP server gracefully", "error", err)
 		}
 	})
@@ -93,15 +96,14 @@ func run(cmd *cobra.Command, args []string) error {
 	g.Add(func() error {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-		select {
-		case sig := <-c:
-			return fmt.Errorf("received signal %s", sig)
-		}
+		sig := <-c
+
+		return fmt.Errorf("received signal %s", sig)
 	}, func(error) {
-		return
 	})
 
-	if err := g.Run(); err != nil {
+	err = g.Run()
+	if err != nil {
 		slog.Info("Services stopped", "reason", err.Error())
 	}
 

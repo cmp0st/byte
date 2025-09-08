@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 
 	"github.com/cmp0st/byte/internal/config"
@@ -21,11 +22,11 @@ func newNewDeviceCommand() *cobra.Command {
 func newDevice(cmd *cobra.Command, args []string) error {
 	conf, err := config.LoadServer()
 	if err != nil {
-		return fmt.Errorf("Failed to load config: %w", err)
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	if conf.Secret == "" || len(conf.Secret) < 32 {
-		return fmt.Errorf("invalid server secret, must be more than 32 characters")
+		return errors.New("invalid server secret, must be more than 32 characters")
 	}
 
 	keychain, err := key.NewServerChain([]byte(conf.Secret))

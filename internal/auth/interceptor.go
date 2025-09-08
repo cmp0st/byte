@@ -29,6 +29,7 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 			if !req.Spec().IsClient {
 				return nil, errors.New("cannot use client auth interceptor on server")
 			}
+
 			token := paseto.NewToken()
 			token.SetExpiration(time.Now().Add(DefaultTokenExpiration))
 			token.SetIssuedAt(time.Now())
@@ -70,6 +71,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 					errors.New(`unauthenticated`),
 				)
 			}
+
 			clientID := req.Header().Get(`Client-ID`)
 			if clientID == "" {
 				logger.ErrorContext(ctx, "missing client id header")

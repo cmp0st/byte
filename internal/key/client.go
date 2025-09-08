@@ -75,7 +75,7 @@ func (c ClientChain) TokenKey() (*paseto.V4SymmetricKey, error) {
 		int(ClientPasetoTokenKeySize),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to derive client ")
+		return nil, fmt.Errorf("failed to derive client: %w", err)
 	}
 
 	tokenKey, err := paseto.V4SymmetricKeyFromBytes(keyseed)

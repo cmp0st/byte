@@ -9,6 +9,7 @@ import (
 
 func NewFromConfig(conf config.Server) *slog.Logger {
 	var level slog.Level
+
 	switch conf.LogLevel {
 	case "DEBUG":
 		level = slog.LevelDebug
@@ -19,6 +20,7 @@ func NewFromConfig(conf config.Server) *slog.Logger {
 	case "ERROR":
 		level = slog.LevelError
 	}
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: level,
 	}))

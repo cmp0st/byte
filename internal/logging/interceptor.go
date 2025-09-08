@@ -15,6 +15,7 @@ func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
 			start := time.Now()
+
 			requestLogger := logger.With(
 				slog.String("procedure", req.Spec().Procedure),
 				slog.String("peer_addr", req.Peer().Addr),
@@ -24,6 +25,7 @@ func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 
 			res, err := next(ctx, req)
 			duration := time.Since(start)
+
 			requestLogger = requestLogger.With(
 				slog.Duration("duration", duration),
 			)
@@ -34,6 +36,7 @@ func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 
 				return res, err
 			}
+
 			requestLogger.InfoContext(ctx, "request succeeded")
 
 			return res, nil
