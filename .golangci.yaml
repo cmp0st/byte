@@ -11,19 +11,8 @@ linters:
   - godox # TODO is fine. shush
   - ireturn # I disagree with this
   - revive # To strict about comment structure
-  - testifylint
-  - testpackage
-  - thelper
-  - tparallel
-  - unconvert
-  - unparam
-  - unused
-  - usestdlibvars
-  - usetesting
-  - varnamelen
-  - wastedassign
-  - whitespace
-  - wrapcheck
+  - varnamelen # I don't mind single letter names
+  - wrapcheck # Wrapping all external errors is tedious
   - wsl # Deprecated and conflicts with wsl_5
 formatters:
   enable:
