@@ -49,7 +49,7 @@ func mkdir(cmd *cobra.Command, args []string) {
 
 	path := args[0]
 
-	_, err = c.MakeDirectory(
+	_, err = c.Files.MakeDirectory(
 		cmd.Context(),
 		connect.NewRequest(&filesv1.MakeDirectoryRequest{
 			CreateParents: parents,

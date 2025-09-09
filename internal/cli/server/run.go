@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -13,12 +14,14 @@ import (
 	"github.com/charmbracelet/ssh"
 	"github.com/cmp0st/byte/internal/api"
 	"github.com/cmp0st/byte/internal/config"
+	"github.com/cmp0st/byte/internal/database"
 	"github.com/cmp0st/byte/internal/key"
 	"github.com/cmp0st/byte/internal/logging"
 	"github.com/cmp0st/byte/internal/sftp"
 	"github.com/cmp0st/byte/internal/storage"
 	oklogrun "github.com/oklog/run"
 	"github.com/spf13/cobra"
+	_ "modernc.org/sqlite"
 )
 
 func newRunCommand() *cobra.Command {
@@ -35,6 +38,21 @@ func run(cmd *cobra.Command, args []string) error {
 	conf, err := config.LoadServer()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	var db *database.DB
+	{
+		sqlitedb, err := sql.Open("sqlite", conf.Database)
+		if err != nil {
+			return fmt.Errorf("failed to open database: %w", err)
+		}
+
+		db = &database.DB{DB: sqlitedb}
+	}
+
+	err = db.Migrate()
+	if err != nil {
+		return err
 	}
 
 	keychain, err := key.NewServerChain([]byte(conf.Secret))
@@ -63,6 +81,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	// Create HTTP API server
 	apiServer, err := api.NewServer(
+		db,
 		store,
 		*keychain,
 		logger,

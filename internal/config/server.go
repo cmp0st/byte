@@ -13,7 +13,8 @@ type Server struct {
 	SFTP SFTP `mapstructure:"sftp" yaml:"sftp"`
 	HTTP HTTP `mapstructure:"http" yaml:"http"`
 
-	Storage Storage `mapstructure:"storage" yaml:"storage"`
+	Storage  Storage `mapstructure:"storage" yaml:"storage"`
+	Database string
 }
 
 type SFTP struct {
@@ -52,6 +53,7 @@ func LoadServer() (*Server, error) {
 	v.SetDefault("http.host", "localhost")
 	v.SetDefault("http.port", DefaultHTTPPort)
 	v.SetDefault("posix.root", "./data")
+	v.SetDefault("database", "byte.db")
 
 	// Config file settings
 	v.SetConfigName("config")

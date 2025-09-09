@@ -1,3 +1,4 @@
 data
 byte
+byte.db
 config.yaml

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package devices.v1;
+
+option go_package = "github.com/cmp0st/byte/gen/devices/v1;devicesv1";
+
+import "google/protobuf/timestamp.proto";
+import "buf/validate/validate.proto";
+
+// DeviceService provides device registration and management functionality
+service DeviceService {
+  rpc CreateDevice(CreateDeviceRequest) returns (CreateDeviceResponse);
+  rpc ListDevices(ListDevicesRequest) returns (ListDevicesResponse);
+  rpc DeleteDevice(DeleteDeviceRequest) returns (DeleteDeviceResponse);
+}
+
+message CreateDeviceRequest {}
+
+message CreateDeviceResponse {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+  
+  // new device key is encrypted with the key encryption key of the calling
+  // device. This prevents exposure of the new device key. Its assumed that the
+  // current device will share the decrypted device key out of band (via QR
+  // code etc).
+  bytes encrypted_device_key = 2;
+}
+
+message ListDevicesRequest {}
+
+message ListDevicesResponse {
+  message Device {
+    string id = 1 [(buf.validate.field).string.uuid = true];
+  } 
+  
+  repeated Device devices = 1;
+}
+
+message DeleteDeviceRequest {
+  string id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message DeleteDeviceResponse {}

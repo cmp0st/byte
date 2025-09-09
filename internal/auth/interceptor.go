@@ -45,7 +45,7 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 
 			tokenStr := token.V4Encrypt(*tokenKey, []byte(chain.ClientID))
 			req.Header().Set("Authorization", "Bearer "+tokenStr)
-			req.Header().Set("Client-ID", chain.ClientID)
+			req.Header().Set("Device-ID", chain.ClientID)
 
 			return next(ctx, req)
 		})
@@ -72,7 +72,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 				)
 			}
 
-			clientID := req.Header().Get(`Client-ID`)
+			clientID := req.Header().Get(`Device-ID`)
 			if clientID == "" {
 				logger.ErrorContext(ctx, "missing client id header")
 
@@ -117,6 +117,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			// TODO: check additional claims like audience here perhaps. At this point though we've checked time
 			// and clientID and that is sufficient
 
+			ctx = WithDevice(ctx, clientID)
 			return next(ctx, req)
 		})
 	}

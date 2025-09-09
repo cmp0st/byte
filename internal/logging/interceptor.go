@@ -21,10 +21,10 @@ func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 				slog.String("peer_addr", req.Peer().Addr),
 			)
 
-			clientID := req.Header().Get(`Client-ID`)
+			clientID := req.Header().Get(`Device-ID`)
 			if clientID != "" {
 				requestLogger = requestLogger.With(
-					slog.String("client_id", clientID),
+					slog.String("device_id", clientID),
 				)
 			}
 

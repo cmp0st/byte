@@ -45,7 +45,7 @@ func ls(cmd *cobra.Command, args []string) {
 		path = args[0]
 	}
 
-	resp, err := c.ListDirectory(
+	resp, err := c.Files.ListDirectory(
 		cmd.Context(),
 		connect.NewRequest(&filesv1.ListDirectoryRequest{
 			Path: path,

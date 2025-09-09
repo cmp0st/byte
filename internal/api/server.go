@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	connectcors "connectrpc.com/cors"
 	"connectrpc.com/validate"
+	"github.com/cmp0st/byte/gen/devices/v1/devicesv1connect"
 	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
 	"github.com/cmp0st/byte/internal/auth"
+	"github.com/cmp0st/byte/internal/database"
 	"github.com/cmp0st/byte/internal/key"
 	"github.com/cmp0st/byte/internal/logging"
 	"github.com/cmp0st/byte/internal/storage"
-	"github.com/rs/cors"
 )
 
 const DefaultReadHeaderTimeout = 10 * time.Second
@@ -26,17 +26,13 @@ type Server struct {
 
 // NewServer creates a new API server.
 func NewServer(
+	db *database.DB,
 	storage storage.Interface,
 	chain key.ServerChain,
 	logger *slog.Logger,
 	addr string,
 ) (*Server, error) {
 	logger.Debug("API: Creating new server", "addr", addr)
-
-	mux := http.NewServeMux()
-
-	// Create the file service.
-	fileService := NewFileService(storage)
 
 	validateInterceptor, err := validate.NewInterceptor()
 	if err != nil {
@@ -46,29 +42,33 @@ func NewServer(
 
 		return nil, err
 	}
-	// Register the connectRPC handler with CORS for local development
-	path, handler := filesv1connect.NewFileServiceHandler(
-		fileService,
-		connect.WithInterceptors(
-			logging.NewInterceptor(logger),
-			auth.NewServerInterceptor(chain),
-			validateInterceptor,
-		),
+
+	interceptors := connect.WithInterceptors(
+		logging.NewInterceptor(logger),
+		auth.NewServerInterceptor(chain),
+		validateInterceptor,
 	)
 
-	corsMiddleware := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:8081"},
-		AllowedMethods: connectcors.AllowedMethods(),
-		AllowedHeaders: connectcors.AllowedHeaders(),
-		ExposedHeaders: connectcors.ExposedHeaders(),
-	})
-
+	// Register all services
+	mux := http.NewServeMux()
+	path, handler := devicesv1connect.NewDeviceServiceHandler(
+		&DeviceService{
+			DB:       db,
+			KeyChain: chain,
+		},
+		interceptors,
+	)
 	mux.Handle(path, handler)
-	slog.Debug("API: ConnectRPC handler registered with CORS", "path", path)
+
+	path, handler = filesv1connect.NewFileServiceHandler(
+		NewFileService(storage),
+		interceptors,
+	)
+	mux.Handle(path, handler)
 
 	server := &http.Server{
 		Addr:              addr,
-		Handler:           corsMiddleware.Handler(mux),
+		Handler:           mux,
 		ReadHeaderTimeout: DefaultReadHeaderTimeout,
 	}
 

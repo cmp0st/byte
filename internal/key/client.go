@@ -1,10 +1,14 @@
 package key
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/hkdf"
+	"crypto/rand"
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"io"
 
 	"aidanwoods.dev/go-paseto"
 	"github.com/google/uuid"
@@ -22,6 +26,12 @@ const (
 
 	// Random UUID.
 	ClientIDUUIDVersion = 4
+
+	// AES 256 key for key encryption (this is used to encrypt new device keys).
+	ClientKeyEncryptionKeyDomainSeperator = `client.key-encryption-key.v1`
+
+	// AES 256 key.
+	ClientKeyEncryptionKeySize = 32
 )
 
 var (
@@ -84,4 +94,78 @@ func (c ClientChain) TokenKey() (*paseto.V4SymmetricKey, error) {
 	}
 
 	return &tokenKey, nil
+}
+
+func (c ClientChain) EncryptKey(plaintext []byte) ([]byte, error) {
+	encKey, err := hkdf.Key(
+		sha256.New,
+		c.Seed[:],
+		nil,
+		string(ClientKeyEncryptionKeyDomainSeperator),
+		int(ClientKeyEncryptionKeySize),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	block, err := aes.NewCipher(encKey)
+	if err != nil {
+		return nil, err
+	}
+
+	aead, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce := make([]byte, aead.NonceSize())
+
+	_, err = io.ReadFull(rand.Reader, nonce)
+	if err != nil {
+		return nil, err
+	}
+
+	ciphertext, err := aead.Seal(nil, nonce, plaintext, nil), nil
+	if err != nil {
+		return nil, err
+	}
+
+	return append(ciphertext, nonce...), nil
+}
+
+func (c ClientChain) DecryptKey(ciphertext []byte) ([]byte, error) {
+	encKey, err := hkdf.Key(
+		sha256.New,
+		c.Seed[:],
+		nil,
+		string(ClientKeyEncryptionKeyDomainSeperator),
+		int(ClientKeyEncryptionKeySize),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	block, err := aes.NewCipher(encKey)
+	if err != nil {
+		return nil, err
+	}
+
+	aead, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(ciphertext) < aead.NonceSize() {
+		return nil, errors.New("invalid ciphertext")
+	}
+
+	nonce := ciphertext[len(ciphertext)-aead.NonceSize():]
+	rawCiphertext := ciphertext[:len(ciphertext)-aead.NonceSize()]
+
+	plaintext, err := aead.Open(nil, nonce, rawCiphertext, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return plaintext, nil
 }
