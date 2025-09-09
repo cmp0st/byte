@@ -1,0 +1,5 @@
+- [ ] Pretty printing for device management CLI
+- [ ] Decrypt the device key when `byte device create` returns
+- [ ] Update auth logic to check active devices in database
+- [ ] SSH client setup helpers and testing
+- [ ] SSH auth based on client id and ssh client key derivation
