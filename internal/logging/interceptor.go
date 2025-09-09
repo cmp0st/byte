@@ -21,6 +21,13 @@ func NewInterceptor(logger *slog.Logger) connect.UnaryInterceptorFunc {
 				slog.String("peer_addr", req.Peer().Addr),
 			)
 
+			clientID := req.Header().Get(`Client-ID`)
+			if clientID != "" {
+				requestLogger = requestLogger.With(
+					slog.String("client_id", clientID),
+				)
+			}
+
 			ctx = ContextWith(ctx, requestLogger)
 
 			res, err := next(ctx, req)

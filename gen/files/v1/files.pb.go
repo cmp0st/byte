@@ -197,6 +197,94 @@ func (x *ListDirectoryResponse) GetEntries() []*FileInfo {
 	return nil
 }
 
+type MakeDirectoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CreateParents bool                   `protobuf:"varint,1,opt,name=create_parents,json=createParents,proto3" json:"create_parents,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MakeDirectoryRequest) Reset() {
+	*x = MakeDirectoryRequest{}
+	mi := &file_files_v1_files_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MakeDirectoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MakeDirectoryRequest) ProtoMessage() {}
+
+func (x *MakeDirectoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_files_v1_files_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MakeDirectoryRequest.ProtoReflect.Descriptor instead.
+func (*MakeDirectoryRequest) Descriptor() ([]byte, []int) {
+	return file_files_v1_files_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *MakeDirectoryRequest) GetCreateParents() bool {
+	if x != nil {
+		return x.CreateParents
+	}
+	return false
+}
+
+func (x *MakeDirectoryRequest) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+type MakeDirectoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MakeDirectoryResponse) Reset() {
+	*x = MakeDirectoryResponse{}
+	mi := &file_files_v1_files_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MakeDirectoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MakeDirectoryResponse) ProtoMessage() {}
+
+func (x *MakeDirectoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_files_v1_files_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MakeDirectoryResponse.ProtoReflect.Descriptor instead.
+func (*MakeDirectoryResponse) Descriptor() ([]byte, []int) {
+	return file_files_v1_files_proto_rawDescGZIP(), []int{4}
+}
+
 var File_files_v1_files_proto protoreflect.FileDescriptor
 
 const file_files_v1_files_proto_rawDesc = "" +
@@ -211,9 +299,14 @@ const file_files_v1_files_proto_rawDesc = "" +
 	"\x14ListDirectoryRequest\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\"E\n" +
 	"\x15ListDirectoryResponse\x12,\n" +
-	"\aentries\x18\x01 \x03(\v2\x12.files.v1.FileInfoR\aentries2_\n" +
+	"\aentries\x18\x01 \x03(\v2\x12.files.v1.FileInfoR\aentries\"_\n" +
+	"\x14MakeDirectoryRequest\x12%\n" +
+	"\x0ecreate_parents\x18\x01 \x01(\bR\rcreateParents\x12 \n" +
+	"\x04path\x18\x02 \x01(\tB\f\xbaH\tr\a2\x05[^\x00]+R\x04path\"\x17\n" +
+	"\x15MakeDirectoryResponse2\xb1\x01\n" +
 	"\vFileService\x12P\n" +
-	"\rListDirectory\x12\x1e.files.v1.ListDirectoryRequest\x1a\x1f.files.v1.ListDirectoryResponseB\x88\x01\n" +
+	"\rListDirectory\x12\x1e.files.v1.ListDirectoryRequest\x1a\x1f.files.v1.ListDirectoryResponse\x12P\n" +
+	"\rMakeDirectory\x12\x1e.files.v1.MakeDirectoryRequest\x1a\x1f.files.v1.MakeDirectoryResponseB\x88\x01\n" +
 	"\fcom.files.v1B\n" +
 	"FilesProtoP\x01Z+github.com/cmp0st/byte/gen/files/v1;filesv1\xa2\x02\x03FXX\xaa\x02\bFiles.V1\xca\x02\bFiles\\V1\xe2\x02\x14Files\\V1\\GPBMetadata\xea\x02\tFiles::V1b\x06proto3"
 
@@ -229,20 +322,24 @@ func file_files_v1_files_proto_rawDescGZIP() []byte {
 	return file_files_v1_files_proto_rawDescData
 }
 
-var file_files_v1_files_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_files_v1_files_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_files_v1_files_proto_goTypes = []any{
 	(*FileInfo)(nil),              // 0: files.v1.FileInfo
 	(*ListDirectoryRequest)(nil),  // 1: files.v1.ListDirectoryRequest
 	(*ListDirectoryResponse)(nil), // 2: files.v1.ListDirectoryResponse
-	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
+	(*MakeDirectoryRequest)(nil),  // 3: files.v1.MakeDirectoryRequest
+	(*MakeDirectoryResponse)(nil), // 4: files.v1.MakeDirectoryResponse
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_files_v1_files_proto_depIdxs = []int32{
-	3, // 0: files.v1.FileInfo.modified_time:type_name -> google.protobuf.Timestamp
+	5, // 0: files.v1.FileInfo.modified_time:type_name -> google.protobuf.Timestamp
 	0, // 1: files.v1.ListDirectoryResponse.entries:type_name -> files.v1.FileInfo
 	1, // 2: files.v1.FileService.ListDirectory:input_type -> files.v1.ListDirectoryRequest
-	2, // 3: files.v1.FileService.ListDirectory:output_type -> files.v1.ListDirectoryResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
+	3, // 3: files.v1.FileService.MakeDirectory:input_type -> files.v1.MakeDirectoryRequest
+	2, // 4: files.v1.FileService.ListDirectory:output_type -> files.v1.ListDirectoryResponse
+	4, // 5: files.v1.FileService.MakeDirectory:output_type -> files.v1.MakeDirectoryResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -259,7 +356,7 @@ func file_files_v1_files_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_files_v1_files_proto_rawDesc), len(file_files_v1_files_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

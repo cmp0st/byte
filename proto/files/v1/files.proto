@@ -11,6 +11,7 @@ import "buf/validate/validate.proto";
 service FileService {
   // List directory contents
   rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
+  rpc MakeDirectory(MakeDirectoryRequest) returns (MakeDirectoryResponse);
 }
 
 // File information
@@ -38,3 +39,10 @@ message ListDirectoryResponse {
   // Directory entries
   repeated FileInfo entries = 1;
 }
+
+message MakeDirectoryRequest {
+  bool create_parents = 1;
+  string path = 2 [(buf.validate.field).string.pattern = "[^\0]+"];
+}
+
+message MakeDirectoryResponse {}

@@ -16,6 +16,11 @@ import (
 	"github.com/cmp0st/byte/internal/storage"
 )
 
+const (
+	DefaultDirectoryPermission = 0o700
+	DefaultFilePermission      = 0o600
+)
+
 // FileService implements the files v1 service.
 type FileService struct {
 	storage storage.Interface
@@ -34,11 +39,6 @@ func (s *FileService) ListDirectory(
 	req *connect.Request[filesv1.ListDirectoryRequest],
 ) (*connect.Response[filesv1.ListDirectoryResponse], error) {
 	logger := logging.FromContext(ctx)
-	logger.DebugContext(
-		ctx,
-		"api: ListDirectory request",
-		slog.String("path", req.Msg.GetPath()),
-	)
 
 	if req.Msg.GetPath() == "" {
 		// Default to root
@@ -47,6 +47,8 @@ func (s *FileService) ListDirectory(
 
 	entries, err := afero.ReadDir(s.storage, req.Msg.GetPath())
 	if err != nil {
+		logger.Error("failed to list directory", slog.Any("err", err))
+
 		return nil, connect.NewError(
 			connect.CodeNotFound,
 			fmt.Errorf("failed to list directory: %w", err),
@@ -67,4 +69,27 @@ func (s *FileService) ListDirectory(
 	return connect.NewResponse(&filesv1.ListDirectoryResponse{
 		Entries: directoryEntries,
 	}), nil
+}
+
+func (s *FileService) MakeDirectory(
+	ctx context.Context,
+	req *connect.Request[filesv1.MakeDirectoryRequest],
+) (*connect.Response[filesv1.MakeDirectoryResponse], error) {
+	logger := logging.FromContext(ctx)
+
+	var err error
+	if req.Msg.GetCreateParents() {
+		err = s.storage.MkdirAll(req.Msg.GetPath(), DefaultDirectoryPermission)
+	} else {
+		err = s.storage.Mkdir(req.Msg.GetPath(), DefaultDirectoryPermission)
+	}
+
+	if err != nil {
+		logger.Error("failed to create directory", slog.Any("err", err))
+		// We just assume an invalid argument here, but there are plenty of
+		// other reasons this could fail.
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	return connect.NewResponse(&filesv1.MakeDirectoryResponse{}), nil
 }

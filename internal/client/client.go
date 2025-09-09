@@ -2,9 +2,11 @@ package client
 
 import (
 	"encoding/base64"
+	"log/slog"
 	"net/http"
 
 	"connectrpc.com/connect"
+	"connectrpc.com/validate"
 	"github.com/cmp0st/byte/gen/files/v1/filesv1connect"
 	"github.com/cmp0st/byte/internal/auth"
 	"github.com/cmp0st/byte/internal/config"
@@ -22,12 +24,22 @@ func New(c config.Client) (filesv1connect.FileServiceClient, error) {
 		return nil, err
 	}
 
+	validateInterceptor, err := validate.NewInterceptor()
+	if err != nil {
+		slog.Error("error creating interceptor",
+			slog.String("error", err.Error()),
+		)
+
+		return nil, err
+	}
+
 	return filesv1connect.NewFileServiceClient(
 		http.DefaultClient,
 		c.ServerURL,
 		connect.WithGRPC(),
 		connect.WithInterceptors(
 			auth.NewClientInterceptor(*keychain),
+			validateInterceptor,
 		),
 	), nil
 }

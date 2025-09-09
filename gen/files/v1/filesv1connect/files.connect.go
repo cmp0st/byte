@@ -36,12 +36,16 @@ const (
 	// FileServiceListDirectoryProcedure is the fully-qualified name of the FileService's ListDirectory
 	// RPC.
 	FileServiceListDirectoryProcedure = "/files.v1.FileService/ListDirectory"
+	// FileServiceMakeDirectoryProcedure is the fully-qualified name of the FileService's MakeDirectory
+	// RPC.
+	FileServiceMakeDirectoryProcedure = "/files.v1.FileService/MakeDirectory"
 )
 
 // FileServiceClient is a client for the files.v1.FileService service.
 type FileServiceClient interface {
 	// List directory contents
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
+	MakeDirectory(context.Context, *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error)
 }
 
 // NewFileServiceClient constructs a client for the files.v1.FileService service. By default, it
@@ -61,12 +65,19 @@ func NewFileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(fileServiceMethods.ByName("ListDirectory")),
 			connect.WithClientOptions(opts...),
 		),
+		makeDirectory: connect.NewClient[v1.MakeDirectoryRequest, v1.MakeDirectoryResponse](
+			httpClient,
+			baseURL+FileServiceMakeDirectoryProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("MakeDirectory")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // fileServiceClient implements FileServiceClient.
 type fileServiceClient struct {
 	listDirectory *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
+	makeDirectory *connect.Client[v1.MakeDirectoryRequest, v1.MakeDirectoryResponse]
 }
 
 // ListDirectory calls files.v1.FileService.ListDirectory.
@@ -74,10 +85,16 @@ func (c *fileServiceClient) ListDirectory(ctx context.Context, req *connect.Requ
 	return c.listDirectory.CallUnary(ctx, req)
 }
 
+// MakeDirectory calls files.v1.FileService.MakeDirectory.
+func (c *fileServiceClient) MakeDirectory(ctx context.Context, req *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error) {
+	return c.makeDirectory.CallUnary(ctx, req)
+}
+
 // FileServiceHandler is an implementation of the files.v1.FileService service.
 type FileServiceHandler interface {
 	// List directory contents
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
+	MakeDirectory(context.Context, *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error)
 }
 
 // NewFileServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -93,10 +110,18 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(fileServiceMethods.ByName("ListDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
+	fileServiceMakeDirectoryHandler := connect.NewUnaryHandler(
+		FileServiceMakeDirectoryProcedure,
+		svc.MakeDirectory,
+		connect.WithSchema(fileServiceMethods.ByName("MakeDirectory")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/files.v1.FileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FileServiceListDirectoryProcedure:
 			fileServiceListDirectoryHandler.ServeHTTP(w, r)
+		case FileServiceMakeDirectoryProcedure:
+			fileServiceMakeDirectoryHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -108,4 +133,8 @@ type UnimplementedFileServiceHandler struct{}
 
 func (UnimplementedFileServiceHandler) ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.ListDirectory is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) MakeDirectory(context.Context, *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.MakeDirectory is not implemented"))
 }

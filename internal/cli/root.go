@@ -14,6 +14,7 @@ func New() *cobra.Command {
 
 	cmd.AddCommand(server.NewCommand())
 	cmd.AddCommand(newLSCommand())
+	cmd.AddCommand(newMkdirCommand())
 
 	return cmd
 }
