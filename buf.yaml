@@ -1,6 +1,7 @@
 version: v2
 modules:
 - path: proto
+  name: buf.build/cmp0st/byte
 deps:
 - buf.build/bufbuild/protovalidate:v0.14.1
 lint:
