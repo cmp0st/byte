@@ -1,12 +1,14 @@
 package device
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"connectrpc.com/connect"
 	devicesv1 "github.com/cmp0st/byte/gen/devices/v1"
 	"github.com/cmp0st/byte/internal/client"
 	"github.com/cmp0st/byte/internal/config"
+	"github.com/cmp0st/byte/internal/key"
 	"github.com/spf13/cobra"
 )
 
@@ -45,5 +47,27 @@ func create(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Println(resp)
+	rawKey, err := base64.StdEncoding.DecodeString(conf.Secret)
+	if err != nil {
+		fmt.Println("failed to load client secret", err)
+
+		return
+	}
+
+	keychain, err := key.NewClientChain(rawKey, conf.ID)
+	if err != nil {
+		fmt.Println("failed to derive keychain", err)
+
+		return
+	}
+
+	plaintext, err := keychain.DecryptKey(resp.Msg.GetEncryptedDeviceKey())
+	if err != nil {
+		fmt.Println("failed to decrypt device key:", err)
+
+		return
+	}
+
+	fmt.Println("Device ID:", resp.Msg.GetId())
+	fmt.Println("Device Secret:", base64.StdEncoding.EncodeToString(plaintext))
 }

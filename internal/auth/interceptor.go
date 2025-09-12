@@ -118,6 +118,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 			// and clientID and that is sufficient
 
 			ctx = WithDevice(ctx, clientID)
+
 			return next(ctx, req)
 		})
 	}
