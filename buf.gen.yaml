@@ -2,12 +2,29 @@ version: v2
 inputs:
 - directory: proto
 plugins:
+# Golang
 - remote: buf.build/protocolbuffers/go
   out: gen
   opt: paths=source_relative
 - remote: buf.build/connectrpc/go
   out: gen
   opt: paths=source_relative
+# Swift
+- remote: buf.build/apple/swift
+  out: swift/Sources/Generated
+  opt: Visibility=Public
+- remote: buf.build/connectrpc/swift
+  out: swift/Sources/Generated
+  opt:
+  - GenerateAsyncMethods=true
+  - GenerateCallbackMethods=false
+  - Visibility=Public
+- remote: buf.build/connectrpc/swift-mocks
+  out: swift/Sources/GeneratedMocks
+  opt:
+  - GenerateAsyncMethods=true
+  - GenerateCallbackMethods=false
+  - Visibility=Public
 managed:
   enabled: true
   override:
