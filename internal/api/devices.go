@@ -43,8 +43,8 @@ func (ds *DeviceService) CreateDevice(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	// Derive the new device token key
-	var newDeviceTokenKey []byte
+	// Derive the new device root key
+	var newDeviceRootKey []byte
 	{
 		chain, err := ds.KeyChain.ClientChain(id.String())
 		if err != nil {
@@ -53,14 +53,7 @@ func (ds *DeviceService) CreateDevice(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		tokenKey, err := chain.TokenKey()
-		if err != nil {
-			logger.Error("failed to derive new device token key")
-
-			return nil, connect.NewError(connect.CodeInternal, err)
-		}
-
-		newDeviceTokenKey = tokenKey.ExportBytes()
+		newDeviceRootKey = chain.Seed[:]
 	}
 
 	var encrypted []byte
@@ -74,7 +67,7 @@ func (ds *DeviceService) CreateDevice(
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		enc, err := chain.EncryptKey(newDeviceTokenKey)
+		enc, err := chain.EncryptKey(newDeviceRootKey)
 		if err != nil {
 			logger.Error("failed to encrypt new device key")
 

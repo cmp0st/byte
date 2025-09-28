@@ -22,6 +22,20 @@ func (db *DB) AddDevice(ctx context.Context, id string) error {
 	return nil
 }
 
+func (db *DB) DeviceExists(ctx context.Context, id string) (bool, error) {
+	var count int
+
+	err := db.QueryRowContext(ctx, `SELECT count(id) FROM devices WHERE id=?`, id).
+		Scan(&count)
+	if err != nil {
+		logging.FromContext(ctx).Error("failed to check if device exists", slog.Any("err", err))
+
+		return false, fmt.Errorf("failed to check if device exists: %w", err)
+	}
+
+	return count == 1, nil
+}
+
 func (db *DB) ListDevices(ctx context.Context) ([]string, error) {
 	rows, err := db.QueryContext(ctx, "SELECT id FROM devices")
 	if err != nil {

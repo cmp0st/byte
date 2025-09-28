@@ -45,7 +45,7 @@ func NewServer(
 
 	interceptors := connect.WithInterceptors(
 		logging.NewInterceptor(logger),
-		auth.NewServerInterceptor(chain),
+		auth.NewServerInterceptor(chain, db),
 		validateInterceptor,
 	)
 

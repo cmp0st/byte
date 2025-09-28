@@ -10,6 +10,7 @@ import (
 
 	"aidanwoods.dev/go-paseto"
 	"connectrpc.com/connect"
+	"github.com/cmp0st/byte/internal/database"
 	"github.com/cmp0st/byte/internal/key"
 	"github.com/cmp0st/byte/internal/logging"
 )
@@ -48,7 +49,7 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 	return connect.UnaryInterceptorFunc(interceptor)
 }
 
-func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
+func NewServerInterceptor(chain key.ServerChain, db *database.DB) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(
 			ctx context.Context,
@@ -56,10 +57,10 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 		) (connect.AnyResponse, error) {
 			logger := logging.FromContext(ctx)
 
-			tokenStr, found := strings.CutPrefix(req.Header().Get(`Authorization`), "Bearer ")
-			if !found {
-				logger.ErrorContext(ctx, "missing authorization header")
+			authHeader := req.Header().Get(`Authorization`)
 
+			tokenStr, found := strings.CutPrefix(authHeader, "Bearer ")
+			if !found {
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
 					errors.New(`unauthenticated`),
@@ -68,7 +69,7 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 
 			clientID := req.Header().Get(`Device-ID`)
 			if clientID == "" {
-				logger.ErrorContext(ctx, "missing client id header")
+				logger.ErrorContext(ctx, "server auth interceptor: missing client id header")
 
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
@@ -76,11 +77,11 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 				)
 			}
 
-			// TODO: check that this clientID is active by looking up valid devices
-
 			clientChain, err := chain.ClientChain(clientID)
 			if err != nil {
-				logger.ErrorContext(ctx, "failed to load client chain", slog.Any("err", err))
+				logger.ErrorContext(ctx, "server auth interceptor: failed to load client chain",
+					slog.String("device_id", clientID),
+					slog.Any("err", err))
 
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
@@ -90,7 +91,12 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 
 			tokenKey, err := clientChain.TokenKey()
 			if err != nil {
-				logger.ErrorContext(ctx, "failed to derive client token key", slog.Any("err", err))
+				logger.ErrorContext(
+					ctx,
+					"server auth interceptor: failed to derive client token key",
+					slog.String("device_id", clientID),
+					slog.Any("err", err),
+				)
 
 				return nil, connect.NewError(
 					connect.CodeUnauthenticated,
@@ -107,9 +113,39 @@ func NewServerInterceptor(chain key.ServerChain) connect.UnaryInterceptorFunc {
 				)
 			}
 
-			_ = token
+			// NB: It is important to check device existence here only
+			// after the token is authenticated to prevent pre-auth data
+			// from touching the database layer
+			ok, err := db.DeviceExists(ctx, clientID)
+			if err != nil {
+				logger.ErrorContext(
+					ctx,
+					"failed to check if device exists",
+					slog.Any("err", err),
+				)
+
+				return nil, connect.NewError(
+					connect.CodeUnauthenticated,
+					errors.New("unauthenticated"),
+				)
+			}
+
+			if !ok {
+				logger.WarnContext(
+					ctx,
+					"device does not exist",
+					slog.String("device_id", clientID),
+				)
+
+				return nil, connect.NewError(
+					connect.CodeUnauthenticated,
+					errors.New("unauthenticated"),
+				)
+			}
+
 			// TODO: check additional claims like audience here perhaps. At this point though we've checked time
 			// and clientID and that is sufficient
+			_ = token
 
 			ctx = WithDevice(ctx, clientID)
 
