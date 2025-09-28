@@ -30,12 +30,6 @@ public final class AuthInterceptor: UnaryInterceptor {
             let now = Date()
             let expiration = now.addingTimeInterval(defaultTokenExpiration)
 
-            let tokenKey = try self.clientChain.tokenKey()
-
-            // Convert SymmetricKey to Paseto key format
-            let keyData = tokenKey.withUnsafeBytes { Data($0) }
-            let pasetoKey = Version4.Local.SymmetricKey(material: keyData.bytes)
-
             var token = Token()
             token.expiration = expiration
             token.issuedAt = now
@@ -45,7 +39,7 @@ public final class AuthInterceptor: UnaryInterceptor {
 
             let encrypted = Version4.Local.encrypt(
                 Package(claims),
-                with: pasetoKey,
+                with: try self.clientChain.tokenKey(),
                 implicit: self.clientChain.clientID.data(using: .utf8)!,
             )
 
@@ -110,4 +104,3 @@ private struct PasetoPayload: Codable {
         self.nbf = notBefore.timeIntervalSince1970
     }
 }
-

@@ -11,16 +11,16 @@ plugins:
   opt: paths=source_relative
 # Swift
 - remote: buf.build/apple/swift
-  out: swift/Sources/Generated
+  out: swift/Sources/ByteClient/Generated
   opt: Visibility=Public
 - remote: buf.build/connectrpc/swift
-  out: swift/Sources/Generated
+  out: swift/Sources/ByteClient/Generated
   opt:
   - GenerateAsyncMethods=true
   - GenerateCallbackMethods=false
   - Visibility=Public
 - remote: buf.build/connectrpc/swift-mocks
-  out: swift/Sources/GeneratedMocks
+  out: swift/Sources/ByteClient/GeneratedMocks
   opt:
   - GenerateAsyncMethods=true
   - GenerateCallbackMethods=false

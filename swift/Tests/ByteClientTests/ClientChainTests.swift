@@ -1,18 +1,19 @@
 import XCTest
+
 @testable import ByteClient
 
 final class ClientChainTests: XCTestCase {
 
     func testClientChainInitialization() throws {
-        let rootKey = Data(repeating: 0x42, count: 32) // 32 bytes of 0x42
-        let clientID = "550e8400-e29b-41d4-a716-446655440000" // Valid UUID v4
+        let rootKey = Data(repeating: 0x42, count: 32)  // 32 bytes of 0x42
+        let clientID = "550e8400-e29b-41d4-a716-446655440000"  // Valid UUID v4
 
         let clientChain = try ClientChain(root: rootKey, clientID: clientID)
         XCTAssertEqual(clientChain.clientID, clientID)
     }
 
     func testInvalidRootKeySize() {
-        let invalidRootKey = Data(repeating: 0x42, count: 16) // Wrong size
+        let invalidRootKey = Data(repeating: 0x42, count: 16)  // Wrong size
         let clientID = "550e8400-e29b-41d4-a716-446655440000"
 
         XCTAssertThrowsError(try ClientChain(root: invalidRootKey, clientID: clientID)) { error in
@@ -80,3 +81,4 @@ final class ClientChainTests: XCTestCase {
         XCTAssertEqual(decrypted2, plaintext)
     }
 }
+

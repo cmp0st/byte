@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import ByteClient
 
 final class ConfigurationTests: XCTestCase {
@@ -6,8 +7,8 @@ final class ConfigurationTests: XCTestCase {
     func testValidConfiguration() throws {
         let config = ByteClientConfiguration(
             serverURL: "https://example.com",
-            deviceID: "550e8400-e29b-41d4-a716-446655440000", // Valid UUID v4
-            secret: "dGVzdA==", // "test" in base64
+            deviceID: "550e8400-e29b-41d4-a716-446655440000",  // Valid UUID v4
+            secret: "dGVzdA==",  // "test" in base64
             timeout: 30.0
         )
 
@@ -62,3 +63,4 @@ final class ConfigurationTests: XCTestCase {
         }
     }
 }
+

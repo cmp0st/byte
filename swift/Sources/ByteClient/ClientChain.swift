@@ -44,7 +44,7 @@ public struct ClientChain: Sendable {
     /// Derive the PASETO token key using HKDF
     /// - Returns: A PASETO V4 symmetric key
     /// - Throws: `KeyError` if key derivation fails
-    public func tokenKey() throws -> Crypto.SymmetricKey {
+    public func tokenKey() throws -> Paseto.Version4.Local.SymmetricKey {
         let salt = Data()  // Empty salt as in Go implementation
         let info = clientPasetoTokenKeyDomainSeparator.data(using: .utf8)!
 
@@ -55,7 +55,8 @@ public struct ClientChain: Sendable {
             outputByteCount: clientPasetoTokenKeySize
         )
 
-        return derivedKey
+        let keyData = derivedKey.withUnsafeBytes { Data($0) }
+        return Version4.Local.SymmetricKey(material: keyData.bytes)
     }
 
     /// Encrypt data using the client's encryption key
@@ -139,4 +140,3 @@ public struct ClientChain: Sendable {
         return derivedKey
     }
 }
-

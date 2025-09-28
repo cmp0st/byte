@@ -1,6 +1,5 @@
-import XCTest
-import Generated
 import Connect
+import XCTest
 
 @testable import ByteClient
 
@@ -175,7 +174,9 @@ final class IntegrationTests: XCTestCase {
         case .failure(let error):
             // Check if it's an authentication error
             if error.code == .unauthenticated {
-                XCTFail("Authentication failed - check your credentials: \(error.message ?? "No message")")
+                XCTFail(
+                    "Authentication failed - check your credentials: \(error.message ?? "No message")"
+                )
             } else {
                 XCTFail("Request failed with non-auth error: \(error)")
             }
@@ -198,4 +199,3 @@ final class IntegrationTests: XCTestCase {
         print("✅ Client configuration and initialization successful!")
     }
 }
-

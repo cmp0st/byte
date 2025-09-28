@@ -25,19 +25,11 @@ let package = Package(
             name: "ByteClient",
             dependencies: [
                 .product(name: "Connect", package: "connect-swift"),
+                .product(name: "ConnectMocks", package: "connect-swift"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Paseto", package: "swift-paseto"),
-                "Generated",
             ]
-        ),
-        .target(
-            name: "Generated",
-            dependencies: [
-                .product(name: "Connect", package: "connect-swift"),
-                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
-            ],
-            path: "Sources/Generated"
         ),
         .testTarget(
             name: "ByteClientTests",
