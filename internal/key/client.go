@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"aidanwoods.dev/go-paseto"
 	"github.com/google/uuid"
@@ -32,6 +33,11 @@ const (
 
 	// AES 256 key.
 	ClientKeyEncryptionKeySize = 32
+
+	// NB: Tokens are minted per-rpc request so we have very short
+	// expiration per token to mitigate replay attacks in the case of a
+	// token leak.
+	DefaultTokenExpiration = 30 * time.Second
 )
 
 var (
@@ -94,6 +100,24 @@ func (c ClientChain) TokenKey() (*paseto.V4SymmetricKey, error) {
 	}
 
 	return &tokenKey, nil
+}
+
+func (c ClientChain) Token() (*string, error) {
+	now := time.Now()
+
+	token := paseto.NewToken()
+	token.SetExpiration(now.Add(DefaultTokenExpiration))
+	token.SetIssuedAt(now)
+	token.SetNotBefore(now)
+
+	tokenKey, err := c.TokenKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive client key for token creation: %w", err)
+	}
+
+	tokenStr := token.V4Encrypt(*tokenKey, []byte(c.ClientID))
+
+	return &tokenStr, nil
 }
 
 func (c ClientChain) EncryptKey(plaintext []byte) ([]byte, error) {

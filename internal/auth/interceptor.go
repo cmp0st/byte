@@ -30,21 +30,15 @@ func NewClientInterceptor(chain key.ClientChain) connect.UnaryInterceptorFunc {
 				return nil, errors.New("cannot use client auth interceptor on server")
 			}
 
-			token := paseto.NewToken()
-			token.SetExpiration(time.Now().Add(DefaultTokenExpiration))
-			token.SetIssuedAt(time.Now())
-			token.SetNotBefore(time.Now())
-
-			tokenKey, err := chain.TokenKey()
+			token, err := chain.Token()
 			if err != nil {
 				return nil, connect.NewError(
 					connect.CodeFailedPrecondition,
-					fmt.Errorf("client key chain misconfigured: %w", err),
+					fmt.Errorf("failed to generate token: %w", err),
 				)
 			}
 
-			tokenStr := token.V4Encrypt(*tokenKey, []byte(chain.ClientID))
-			req.Header().Set("Authorization", "Bearer "+tokenStr)
+			req.Header().Set("Authorization", "Bearer "+*token)
 			req.Header().Set("Device-ID", chain.ClientID)
 
 			return next(ctx, req)
