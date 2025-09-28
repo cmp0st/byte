@@ -26,26 +26,11 @@ public final class AuthInterceptor: UnaryInterceptor {
         proceed: @escaping @Sendable (Result<HTTPRequest<Message>, ConnectError>) -> Void
     ) {
         do {
-            // Create PASETO token similar to Go implementation
-            let now = Date()
-            let expiration = now.addingTimeInterval(defaultTokenExpiration)
-
-            var token = Token()
-            token.expiration = expiration
-            token.issuedAt = now
-            token.notBefore = now
-
-            let claims = token.claimsJSON
-
-            let encrypted = Version4.Local.encrypt(
-                Package(claims),
-                with: try self.clientChain.tokenKey(),
-                implicit: self.clientChain.clientID.data(using: .utf8)!,
-            )
+            let token = try self.clientChain.token()
 
             // Add authentication headers
             var headers = request.headers
-            headers["Authorization"] = ["Bearer \(encrypted)"]
+            headers["Authorization"] = ["Bearer \(token)"]
             headers["Device-ID"] = [self.clientChain.clientID]
 
             let modifiedRequest = HTTPRequest(

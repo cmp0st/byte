@@ -9,6 +9,7 @@ private let clientPasetoTokenKeyDomainSeparator = "client.token.paseto-v4.v1"
 private let clientKeyEncryptionKeyDomainSeparator = "client.key-encryption-key.v1"
 private let clientKeyEncryptionKeySize = 32
 private let clientIDUUIDVersion = 4
+private let defaultTokenExpiration: TimeInterval = 30.0
 
 /// Swift equivalent of the Go ClientChain structure
 public struct ClientChain: Sendable {
@@ -57,6 +58,28 @@ public struct ClientChain: Sendable {
 
         let keyData = derivedKey.withUnsafeBytes { Data($0) }
         return Version4.Local.SymmetricKey(material: keyData.bytes)
+    }
+
+    public func token() throws -> String {
+        // Create PASETO token similar to Go implementation
+        let now = Date()
+        let expiration = now.addingTimeInterval(defaultTokenExpiration)
+
+        var token = Token()
+        token.expiration = expiration
+        token.issuedAt = now
+        token.notBefore = now
+
+        let claims = token.claimsJSON
+
+        let key = try self.tokenKey()
+        let encrypted = Version4.Local.encrypt(
+            Package(claims),
+            with: key,
+            implicit: self.clientID.data(using: .utf8)!,
+        )
+
+        return encrypted.asString
     }
 
     /// Encrypt data using the client's encryption key
