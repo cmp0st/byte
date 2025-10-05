@@ -2,6 +2,7 @@ package device
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"connectrpc.com/connect"
@@ -9,6 +10,7 @@ import (
 	"github.com/cmp0st/byte/internal/client"
 	"github.com/cmp0st/byte/internal/config"
 	"github.com/cmp0st/byte/internal/key"
+	qrcode "github.com/skip2/go-qrcode"
 	"github.com/spf13/cobra"
 )
 
@@ -68,6 +70,29 @@ func create(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Println("Device ID:", resp.Msg.GetId())
+	deviceConfig := map[string]string{
+		"serverUrl": conf.ServerURL,
+		"deviceId":  resp.Msg.GetId(),
+		"secret":    base64.StdEncoding.EncodeToString(plaintext),
+	}
+
+	// Generate QR code with low recovery level for smaller size
+	configJSON, err := json.Marshal(deviceConfig)
+	if err != nil {
+		fmt.Println("failed to marshal config:", err)
+		return
+	}
+
+	qr, err := qrcode.New(string(configJSON), qrcode.Low)
+	if err != nil {
+		fmt.Println("failed to generate QR code:", err)
+		return
+	}
+
+	fmt.Println("\nDevice created successfully!")
+	fmt.Println("Device ID:    ", resp.Msg.GetId())
 	fmt.Println("Device Secret:", base64.StdEncoding.EncodeToString(plaintext))
+	fmt.Println("Server URL:   ", conf.ServerURL)
+	fmt.Println("\nScan this QR code with the Byte iOS app:")
+	fmt.Println(qr.ToString(false))
 }

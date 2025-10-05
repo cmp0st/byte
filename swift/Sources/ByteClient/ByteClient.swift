@@ -1,6 +1,5 @@
 import Connect
 import Foundation
-import Generated
 
 /// Main client class for the Byte file server, similar to the Go implementation
 public class ByteClient {

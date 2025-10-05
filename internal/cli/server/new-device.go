@@ -2,12 +2,14 @@ package server
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/cmp0st/byte/internal/config"
 	"github.com/cmp0st/byte/internal/key"
 	"github.com/google/uuid"
+	qrcode "github.com/skip2/go-qrcode"
 	"github.com/spf13/cobra"
 )
 
@@ -17,6 +19,12 @@ func newNewDeviceCommand() *cobra.Command {
 		Short: "create new device",
 		RunE:  newDevice,
 	}
+}
+
+type DeviceConfig struct {
+	ServerURL string `json:"serverUrl"`
+	DeviceID  string `json:"deviceId"`
+	Secret    string `json:"secret"`
 }
 
 func newDevice(cmd *cobra.Command, args []string) error {
@@ -34,18 +42,43 @@ func newDevice(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	clientID, err := uuid.NewRandom()
+	deviceID, err := uuid.NewRandom()
 	if err != nil {
 		return err
 	}
 
-	clientKeyChain, err := keychain.ClientChain(clientID.String())
+	deviceKeyChain, err := keychain.ClientChain(deviceID.String())
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("client id: ", clientID.String())
-	fmt.Println("client secret: ", base64.StdEncoding.EncodeToString(clientKeyChain.Seed[:]))
+	// Construct server URL
+	serverURL := fmt.Sprintf("http://%s:%d", conf.HTTP.Host, conf.HTTP.Port)
+
+	deviceConfig := DeviceConfig{
+		ServerURL: serverURL,
+		DeviceID:  deviceID.String(),
+		Secret:    base64.StdEncoding.EncodeToString(deviceKeyChain.Seed[:]),
+	}
+
+	// Generate QR code
+	configJSON, err := json.Marshal(deviceConfig)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	// Use low recovery level for smaller QR code
+	qr, err := qrcode.New(string(configJSON), qrcode.Low)
+	if err != nil {
+		return fmt.Errorf("failed to generate QR code: %w", err)
+	}
+
+	fmt.Println("\nDevice created successfully!")
+	fmt.Println("Device ID:    ", deviceID.String())
+	fmt.Println("Device Secret:", base64.StdEncoding.EncodeToString(deviceKeyChain.Seed[:]))
+	fmt.Println("Server URL:   ", serverURL)
+	fmt.Println("\nScan this QR code with the Byte iOS app:")
+	fmt.Println(qr.ToString(false))
 
 	return nil
 }
