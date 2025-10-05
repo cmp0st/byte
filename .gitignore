@@ -1,4 +1,4 @@
-data
-byte
-byte.db
-config.yaml
+/data
+/byte
+/byte.db
+/config.yaml

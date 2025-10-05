@@ -16,8 +16,25 @@ public protocol Files_V1_FileServiceClientInterface: Sendable {
     @available(iOS 13, *)
     func `listDirectory`(request: Files_V1_ListDirectoryRequest, headers: Connect.Headers) async -> ResponseMessage<Files_V1_ListDirectoryResponse>
 
+    /// Create a directory
     @available(iOS 13, *)
     func `makeDirectory`(request: Files_V1_MakeDirectoryRequest, headers: Connect.Headers) async -> ResponseMessage<Files_V1_MakeDirectoryResponse>
+
+    /// Delete a directory
+    @available(iOS 13, *)
+    func `removeDirectory`(request: Files_V1_RemoveDirectoryRequest, headers: Connect.Headers) async -> ResponseMessage<Files_V1_RemoveDirectoryResponse>
+
+    /// Read file contents
+    @available(iOS 13, *)
+    func `readFile`(request: Files_V1_ReadFileRequest, headers: Connect.Headers) async -> ResponseMessage<Files_V1_ReadFileResponse>
+
+    /// Write file contents
+    @available(iOS 13, *)
+    func `writeFile`(request: Files_V1_WriteFileRequest, headers: Connect.Headers) async -> ResponseMessage<Files_V1_WriteFileResponse>
+
+    /// Delete a file or directory
+    @available(iOS 13, *)
+    func `deleteFile`(request: Files_V1_DeleteFileRequest, headers: Connect.Headers) async -> ResponseMessage<Files_V1_DeleteFileResponse>
 }
 
 /// Concrete implementation of `Files_V1_FileServiceClientInterface`.
@@ -38,10 +55,34 @@ public final class Files_V1_FileServiceClient: Files_V1_FileServiceClientInterfa
         return await self.client.unary(path: "/files.v1.FileService/MakeDirectory", idempotencyLevel: .unknown, request: request, headers: headers)
     }
 
+    @available(iOS 13, *)
+    public func `removeDirectory`(request: Files_V1_RemoveDirectoryRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_RemoveDirectoryResponse> {
+        return await self.client.unary(path: "/files.v1.FileService/RemoveDirectory", idempotencyLevel: .unknown, request: request, headers: headers)
+    }
+
+    @available(iOS 13, *)
+    public func `readFile`(request: Files_V1_ReadFileRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_ReadFileResponse> {
+        return await self.client.unary(path: "/files.v1.FileService/ReadFile", idempotencyLevel: .unknown, request: request, headers: headers)
+    }
+
+    @available(iOS 13, *)
+    public func `writeFile`(request: Files_V1_WriteFileRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_WriteFileResponse> {
+        return await self.client.unary(path: "/files.v1.FileService/WriteFile", idempotencyLevel: .unknown, request: request, headers: headers)
+    }
+
+    @available(iOS 13, *)
+    public func `deleteFile`(request: Files_V1_DeleteFileRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_DeleteFileResponse> {
+        return await self.client.unary(path: "/files.v1.FileService/DeleteFile", idempotencyLevel: .unknown, request: request, headers: headers)
+    }
+
     public enum Metadata {
         public enum Methods {
             public static let listDirectory = Connect.MethodSpec(name: "ListDirectory", service: "files.v1.FileService", type: .unary)
             public static let makeDirectory = Connect.MethodSpec(name: "MakeDirectory", service: "files.v1.FileService", type: .unary)
+            public static let removeDirectory = Connect.MethodSpec(name: "RemoveDirectory", service: "files.v1.FileService", type: .unary)
+            public static let readFile = Connect.MethodSpec(name: "ReadFile", service: "files.v1.FileService", type: .unary)
+            public static let writeFile = Connect.MethodSpec(name: "WriteFile", service: "files.v1.FileService", type: .unary)
+            public static let deleteFile = Connect.MethodSpec(name: "DeleteFile", service: "files.v1.FileService", type: .unary)
         }
     }
 }

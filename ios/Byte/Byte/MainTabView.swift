@@ -18,13 +18,19 @@ struct MainTabView: View {
                     Image(systemName: "laptopcomputer.and.iphone")
                     Text("Devices")
                 }
-            
+
             FilesView()
                 .tabItem {
                     Image(systemName: "folder")
                     Text("Files")
                 }
-            
+
+            PhotosSyncView()
+                .tabItem {
+                    Image(systemName: "photo.on.rectangle")
+                    Text("Photos")
+                }
+
             SettingsView()
                 .tabItem {
                     Image(systemName: "gear")

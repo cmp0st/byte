@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
 
 	"github.com/cmp0st/byte/internal/config"
 	"github.com/cmp0st/byte/internal/key"
@@ -53,7 +55,7 @@ func newDevice(cmd *cobra.Command, args []string) error {
 	}
 
 	// Construct server URL
-	serverURL := fmt.Sprintf("http://%s:%d", conf.HTTP.Host, conf.HTTP.Port)
+	serverURL := "http://" + net.JoinHostPort(conf.HTTP.Host, strconv.Itoa(conf.HTTP.Port))
 
 	deviceConfig := DeviceConfig{
 		ServerURL: serverURL,

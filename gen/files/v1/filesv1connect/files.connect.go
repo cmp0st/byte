@@ -39,13 +39,31 @@ const (
 	// FileServiceMakeDirectoryProcedure is the fully-qualified name of the FileService's MakeDirectory
 	// RPC.
 	FileServiceMakeDirectoryProcedure = "/files.v1.FileService/MakeDirectory"
+	// FileServiceRemoveDirectoryProcedure is the fully-qualified name of the FileService's
+	// RemoveDirectory RPC.
+	FileServiceRemoveDirectoryProcedure = "/files.v1.FileService/RemoveDirectory"
+	// FileServiceReadFileProcedure is the fully-qualified name of the FileService's ReadFile RPC.
+	FileServiceReadFileProcedure = "/files.v1.FileService/ReadFile"
+	// FileServiceWriteFileProcedure is the fully-qualified name of the FileService's WriteFile RPC.
+	FileServiceWriteFileProcedure = "/files.v1.FileService/WriteFile"
+	// FileServiceDeleteFileProcedure is the fully-qualified name of the FileService's DeleteFile RPC.
+	FileServiceDeleteFileProcedure = "/files.v1.FileService/DeleteFile"
 )
 
 // FileServiceClient is a client for the files.v1.FileService service.
 type FileServiceClient interface {
 	// List directory contents
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
+	// Create a directory
 	MakeDirectory(context.Context, *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error)
+	// Delete a directory
+	RemoveDirectory(context.Context, *connect.Request[v1.RemoveDirectoryRequest]) (*connect.Response[v1.RemoveDirectoryResponse], error)
+	// Read file contents
+	ReadFile(context.Context, *connect.Request[v1.ReadFileRequest]) (*connect.Response[v1.ReadFileResponse], error)
+	// Write file contents
+	WriteFile(context.Context, *connect.Request[v1.WriteFileRequest]) (*connect.Response[v1.WriteFileResponse], error)
+	// Delete a file or directory
+	DeleteFile(context.Context, *connect.Request[v1.DeleteFileRequest]) (*connect.Response[v1.DeleteFileResponse], error)
 }
 
 // NewFileServiceClient constructs a client for the files.v1.FileService service. By default, it
@@ -71,13 +89,41 @@ func NewFileServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(fileServiceMethods.ByName("MakeDirectory")),
 			connect.WithClientOptions(opts...),
 		),
+		removeDirectory: connect.NewClient[v1.RemoveDirectoryRequest, v1.RemoveDirectoryResponse](
+			httpClient,
+			baseURL+FileServiceRemoveDirectoryProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("RemoveDirectory")),
+			connect.WithClientOptions(opts...),
+		),
+		readFile: connect.NewClient[v1.ReadFileRequest, v1.ReadFileResponse](
+			httpClient,
+			baseURL+FileServiceReadFileProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("ReadFile")),
+			connect.WithClientOptions(opts...),
+		),
+		writeFile: connect.NewClient[v1.WriteFileRequest, v1.WriteFileResponse](
+			httpClient,
+			baseURL+FileServiceWriteFileProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("WriteFile")),
+			connect.WithClientOptions(opts...),
+		),
+		deleteFile: connect.NewClient[v1.DeleteFileRequest, v1.DeleteFileResponse](
+			httpClient,
+			baseURL+FileServiceDeleteFileProcedure,
+			connect.WithSchema(fileServiceMethods.ByName("DeleteFile")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // fileServiceClient implements FileServiceClient.
 type fileServiceClient struct {
-	listDirectory *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
-	makeDirectory *connect.Client[v1.MakeDirectoryRequest, v1.MakeDirectoryResponse]
+	listDirectory   *connect.Client[v1.ListDirectoryRequest, v1.ListDirectoryResponse]
+	makeDirectory   *connect.Client[v1.MakeDirectoryRequest, v1.MakeDirectoryResponse]
+	removeDirectory *connect.Client[v1.RemoveDirectoryRequest, v1.RemoveDirectoryResponse]
+	readFile        *connect.Client[v1.ReadFileRequest, v1.ReadFileResponse]
+	writeFile       *connect.Client[v1.WriteFileRequest, v1.WriteFileResponse]
+	deleteFile      *connect.Client[v1.DeleteFileRequest, v1.DeleteFileResponse]
 }
 
 // ListDirectory calls files.v1.FileService.ListDirectory.
@@ -90,11 +136,40 @@ func (c *fileServiceClient) MakeDirectory(ctx context.Context, req *connect.Requ
 	return c.makeDirectory.CallUnary(ctx, req)
 }
 
+// RemoveDirectory calls files.v1.FileService.RemoveDirectory.
+func (c *fileServiceClient) RemoveDirectory(ctx context.Context, req *connect.Request[v1.RemoveDirectoryRequest]) (*connect.Response[v1.RemoveDirectoryResponse], error) {
+	return c.removeDirectory.CallUnary(ctx, req)
+}
+
+// ReadFile calls files.v1.FileService.ReadFile.
+func (c *fileServiceClient) ReadFile(ctx context.Context, req *connect.Request[v1.ReadFileRequest]) (*connect.Response[v1.ReadFileResponse], error) {
+	return c.readFile.CallUnary(ctx, req)
+}
+
+// WriteFile calls files.v1.FileService.WriteFile.
+func (c *fileServiceClient) WriteFile(ctx context.Context, req *connect.Request[v1.WriteFileRequest]) (*connect.Response[v1.WriteFileResponse], error) {
+	return c.writeFile.CallUnary(ctx, req)
+}
+
+// DeleteFile calls files.v1.FileService.DeleteFile.
+func (c *fileServiceClient) DeleteFile(ctx context.Context, req *connect.Request[v1.DeleteFileRequest]) (*connect.Response[v1.DeleteFileResponse], error) {
+	return c.deleteFile.CallUnary(ctx, req)
+}
+
 // FileServiceHandler is an implementation of the files.v1.FileService service.
 type FileServiceHandler interface {
 	// List directory contents
 	ListDirectory(context.Context, *connect.Request[v1.ListDirectoryRequest]) (*connect.Response[v1.ListDirectoryResponse], error)
+	// Create a directory
 	MakeDirectory(context.Context, *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error)
+	// Delete a directory
+	RemoveDirectory(context.Context, *connect.Request[v1.RemoveDirectoryRequest]) (*connect.Response[v1.RemoveDirectoryResponse], error)
+	// Read file contents
+	ReadFile(context.Context, *connect.Request[v1.ReadFileRequest]) (*connect.Response[v1.ReadFileResponse], error)
+	// Write file contents
+	WriteFile(context.Context, *connect.Request[v1.WriteFileRequest]) (*connect.Response[v1.WriteFileResponse], error)
+	// Delete a file or directory
+	DeleteFile(context.Context, *connect.Request[v1.DeleteFileRequest]) (*connect.Response[v1.DeleteFileResponse], error)
 }
 
 // NewFileServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -116,12 +191,44 @@ func NewFileServiceHandler(svc FileServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(fileServiceMethods.ByName("MakeDirectory")),
 		connect.WithHandlerOptions(opts...),
 	)
+	fileServiceRemoveDirectoryHandler := connect.NewUnaryHandler(
+		FileServiceRemoveDirectoryProcedure,
+		svc.RemoveDirectory,
+		connect.WithSchema(fileServiceMethods.ByName("RemoveDirectory")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceReadFileHandler := connect.NewUnaryHandler(
+		FileServiceReadFileProcedure,
+		svc.ReadFile,
+		connect.WithSchema(fileServiceMethods.ByName("ReadFile")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceWriteFileHandler := connect.NewUnaryHandler(
+		FileServiceWriteFileProcedure,
+		svc.WriteFile,
+		connect.WithSchema(fileServiceMethods.ByName("WriteFile")),
+		connect.WithHandlerOptions(opts...),
+	)
+	fileServiceDeleteFileHandler := connect.NewUnaryHandler(
+		FileServiceDeleteFileProcedure,
+		svc.DeleteFile,
+		connect.WithSchema(fileServiceMethods.ByName("DeleteFile")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/files.v1.FileService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case FileServiceListDirectoryProcedure:
 			fileServiceListDirectoryHandler.ServeHTTP(w, r)
 		case FileServiceMakeDirectoryProcedure:
 			fileServiceMakeDirectoryHandler.ServeHTTP(w, r)
+		case FileServiceRemoveDirectoryProcedure:
+			fileServiceRemoveDirectoryHandler.ServeHTTP(w, r)
+		case FileServiceReadFileProcedure:
+			fileServiceReadFileHandler.ServeHTTP(w, r)
+		case FileServiceWriteFileProcedure:
+			fileServiceWriteFileHandler.ServeHTTP(w, r)
+		case FileServiceDeleteFileProcedure:
+			fileServiceDeleteFileHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -137,4 +244,20 @@ func (UnimplementedFileServiceHandler) ListDirectory(context.Context, *connect.R
 
 func (UnimplementedFileServiceHandler) MakeDirectory(context.Context, *connect.Request[v1.MakeDirectoryRequest]) (*connect.Response[v1.MakeDirectoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.MakeDirectory is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) RemoveDirectory(context.Context, *connect.Request[v1.RemoveDirectoryRequest]) (*connect.Response[v1.RemoveDirectoryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.RemoveDirectory is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) ReadFile(context.Context, *connect.Request[v1.ReadFileRequest]) (*connect.Response[v1.ReadFileResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.ReadFile is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) WriteFile(context.Context, *connect.Request[v1.WriteFileRequest]) (*connect.Response[v1.WriteFileResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.WriteFile is not implemented"))
+}
+
+func (UnimplementedFileServiceHandler) DeleteFile(context.Context, *connect.Request[v1.DeleteFileRequest]) (*connect.Response[v1.DeleteFileResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("files.v1.FileService.DeleteFile is not implemented"))
 }

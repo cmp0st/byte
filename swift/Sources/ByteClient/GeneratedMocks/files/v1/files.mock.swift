@@ -25,6 +25,14 @@ open class Files_V1_FileServiceClientMock: Files_V1_FileServiceClientInterface, 
     public var mockAsyncListDirectory = { (_: Files_V1_ListDirectoryRequest) -> ResponseMessage<Files_V1_ListDirectoryResponse> in .init(result: .success(.init())) }
     /// Mocked for async calls to `makeDirectory()`.
     public var mockAsyncMakeDirectory = { (_: Files_V1_MakeDirectoryRequest) -> ResponseMessage<Files_V1_MakeDirectoryResponse> in .init(result: .success(.init())) }
+    /// Mocked for async calls to `removeDirectory()`.
+    public var mockAsyncRemoveDirectory = { (_: Files_V1_RemoveDirectoryRequest) -> ResponseMessage<Files_V1_RemoveDirectoryResponse> in .init(result: .success(.init())) }
+    /// Mocked for async calls to `readFile()`.
+    public var mockAsyncReadFile = { (_: Files_V1_ReadFileRequest) -> ResponseMessage<Files_V1_ReadFileResponse> in .init(result: .success(.init())) }
+    /// Mocked for async calls to `writeFile()`.
+    public var mockAsyncWriteFile = { (_: Files_V1_WriteFileRequest) -> ResponseMessage<Files_V1_WriteFileResponse> in .init(result: .success(.init())) }
+    /// Mocked for async calls to `deleteFile()`.
+    public var mockAsyncDeleteFile = { (_: Files_V1_DeleteFileRequest) -> ResponseMessage<Files_V1_DeleteFileResponse> in .init(result: .success(.init())) }
 
     public init() {}
 
@@ -34,5 +42,21 @@ open class Files_V1_FileServiceClientMock: Files_V1_FileServiceClientInterface, 
 
     open func `makeDirectory`(request: Files_V1_MakeDirectoryRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_MakeDirectoryResponse> {
         return self.mockAsyncMakeDirectory(request)
+    }
+
+    open func `removeDirectory`(request: Files_V1_RemoveDirectoryRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_RemoveDirectoryResponse> {
+        return self.mockAsyncRemoveDirectory(request)
+    }
+
+    open func `readFile`(request: Files_V1_ReadFileRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_ReadFileResponse> {
+        return self.mockAsyncReadFile(request)
+    }
+
+    open func `writeFile`(request: Files_V1_WriteFileRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_WriteFileResponse> {
+        return self.mockAsyncWriteFile(request)
+    }
+
+    open func `deleteFile`(request: Files_V1_DeleteFileRequest, headers: Connect.Headers = [:]) async -> ResponseMessage<Files_V1_DeleteFileResponse> {
+        return self.mockAsyncDeleteFile(request)
     }
 }

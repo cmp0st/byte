@@ -2,10 +2,9 @@ syntax = "proto3";
 
 package devices.v1;
 
-option go_package = "github.com/cmp0st/byte/gen/devices/v1;devicesv1";
-
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+
+option go_package = "github.com/cmp0st/byte/gen/devices/v1;devicesv1";
 
 // DeviceService provides device registration and management functionality
 service DeviceService {
@@ -18,7 +17,7 @@ message CreateDeviceRequest {}
 
 message CreateDeviceResponse {
   string id = 1 [(buf.validate.field).string.uuid = true];
-  
+
   // new device key is encrypted with the key encryption key of the calling
   // device. This prevents exposure of the new device key. Its assumed that the
   // current device will share the decrypted device key out of band (via QR
@@ -31,8 +30,8 @@ message ListDevicesRequest {}
 message ListDevicesResponse {
   message Device {
     string id = 1 [(buf.validate.field).string.uuid = true];
-  } 
-  
+  }
+
   repeated Device devices = 1;
 }
 

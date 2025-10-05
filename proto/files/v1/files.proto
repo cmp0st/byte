@@ -2,16 +2,25 @@ syntax = "proto3";
 
 package files.v1;
 
-option go_package = "github.com/cmp0st/byte/gen/files/v1;filesv1";
-
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/cmp0st/byte/gen/files/v1;filesv1";
 
 // FileService provides filesystem operations
 service FileService {
   // List directory contents
   rpc ListDirectory(ListDirectoryRequest) returns (ListDirectoryResponse);
+  // Create a directory
   rpc MakeDirectory(MakeDirectoryRequest) returns (MakeDirectoryResponse);
+  // Delete a directory
+  rpc RemoveDirectory(RemoveDirectoryRequest) returns (RemoveDirectoryResponse);
+  // Read file contents
+  rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
+  // Write file contents
+  rpc WriteFile(WriteFileRequest) returns (WriteFileResponse);
+  // Delete a file or directory
+  rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse);
 }
 
 // File information
@@ -46,3 +55,51 @@ message MakeDirectoryRequest {
 }
 
 message MakeDirectoryResponse {}
+
+message RemoveDirectoryRequest {
+  string path = 1 [(buf.validate.field).string.pattern = "[^\0]+"];
+  bool recursive = 2;
+}
+
+message RemoveDirectoryResponse {}
+
+// Read file request
+message ReadFileRequest {
+  // Path to the file to read
+  string path = 1 [(buf.validate.field).string.pattern = "[^\0]+"];
+}
+
+// Read file response
+message ReadFileResponse {
+  // File contents
+  bytes data = 1;
+  // File information
+  FileInfo info = 2;
+}
+
+// Write file request
+message WriteFileRequest {
+  // Path to the file to write
+  string path = 1 [(buf.validate.field).string.pattern = "[^\0]+"];
+  // File contents
+  bytes data = 2;
+  // Create parent directories if they don't exist
+  bool create_parents = 3;
+}
+
+// Write file response
+message WriteFileResponse {
+  // Information about the written file
+  FileInfo info = 1;
+}
+
+// Delete file request
+message DeleteFileRequest {
+  // Path to the file or directory to delete
+  string path = 1 [(buf.validate.field).string.pattern = "[^\0]+"];
+  // Recursively delete directories
+  bool recursive = 2;
+}
+
+// Delete file response
+message DeleteFileResponse {}
