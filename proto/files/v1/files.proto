@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package files.v1;
 
-option go_package = "github.com/cmp0st/byte/gen/files/v1;filesv1";
-
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/cmp0st/byte/gen/files/v1;filesv1";
 
 // FileService provides filesystem operations
 service FileService {
@@ -15,7 +15,6 @@ service FileService {
   rpc MakeDirectory(MakeDirectoryRequest) returns (MakeDirectoryResponse);
   // Delete a directory
   rpc RemoveDirectory(RemoveDirectoryRequest) returns (RemoveDirectoryResponse);
-  
   // Read file contents
   rpc ReadFile(ReadFileRequest) returns (ReadFileResponse);
   // Write file contents
