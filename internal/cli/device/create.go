@@ -80,12 +80,14 @@ func create(cmd *cobra.Command, args []string) {
 	configJSON, err := json.Marshal(deviceConfig)
 	if err != nil {
 		fmt.Println("failed to marshal config:", err)
+
 		return
 	}
 
 	qr, err := qrcode.New(string(configJSON), qrcode.Low)
 	if err != nil {
 		fmt.Println("failed to generate QR code:", err)
+
 		return
 	}
 
