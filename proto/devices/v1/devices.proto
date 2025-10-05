@@ -4,7 +4,6 @@ package devices.v1;
 
 option go_package = "github.com/cmp0st/byte/gen/devices/v1;devicesv1";
 
-import "google/protobuf/timestamp.proto";
 import "buf/validate/validate.proto";
 
 // DeviceService provides device registration and management functionality
