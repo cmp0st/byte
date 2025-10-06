@@ -15,6 +15,8 @@ struct DevicesView: View {
   @State private var isLoading = false
   @State private var error: String?
   @State private var showingCreateDevice = false
+  @State private var deviceToDelete: Devices_V1_ListDevicesResponse.Device?
+  @State private var showingDeleteConfirmation = false
 
   var body: some View {
     NavigationView {
@@ -31,8 +33,12 @@ struct DevicesView: View {
             .padding()
         } else {
           ForEach(devices, id: \.id) { device in
-            DeviceRow(device: device) {
-              deleteDevice(device)
+            DeviceRow(
+              device: device,
+              isCurrentDevice: device.id == appState.configuration?.deviceID
+            ) {
+              deviceToDelete = device
+              showingDeleteConfirmation = true
             }
           }
         }
@@ -67,6 +73,28 @@ struct DevicesView: View {
       }
       .onAppear {
         loadDevices()
+      }
+      .alert("Delete Device", isPresented: $showingDeleteConfirmation) {
+        Button("Cancel", role: .cancel) {
+          deviceToDelete = nil
+        }
+        Button("Delete", role: .destructive) {
+          if let device = deviceToDelete {
+            deleteDevice(device)
+          }
+          deviceToDelete = nil
+        }
+      } message: {
+        if let device = deviceToDelete, device.id == appState.configuration?.deviceID {
+          Text(
+            """
+            You are about to delete the current device. This will sign you out and \
+            require you to set up the app again. Are you sure?
+            """
+          )
+        } else {
+          Text("Are you sure you want to delete this device? This action cannot be undone.")
+        }
       }
     }
   }
@@ -118,6 +146,8 @@ struct DevicesView: View {
   private func deleteDevice(_ device: Devices_V1_ListDevicesResponse.Device) {
     guard let client = appState.client else { return }
 
+    let isCurrentDevice = device.id == appState.configuration?.deviceID
+
     Task {
       do {
         var request = Devices_V1_DeleteDeviceRequest()
@@ -126,6 +156,11 @@ struct DevicesView: View {
 
         await MainActor.run {
           devices.removeAll { $0.id == device.id }
+
+          // If we deleted the current device, clear configuration
+          if isCurrentDevice {
+            appState.clearConfiguration()
+          }
         }
       } catch {
         await MainActor.run {
@@ -138,22 +173,45 @@ struct DevicesView: View {
 
 struct DeviceRow: View {
   let device: Devices_V1_ListDevicesResponse.Device
+  let isCurrentDevice: Bool
   let onDelete: () -> Void
 
   var body: some View {
     HStack {
-      VStack(alignment: .leading) {
-        Text(device.id)
-          .font(.headline)
+      VStack(alignment: .leading, spacing: 4) {
+        HStack {
+          Text(device.id)
+            .font(.headline)
+
+          if isCurrentDevice {
+            HStack(spacing: 4) {
+              Image(systemName: "checkmark.circle.fill")
+                .font(.caption)
+              Text("Current Device")
+                .font(.caption)
+            }
+            .foregroundColor(.green)
+          }
+        }
+
+        if isCurrentDevice {
+          Text("This device")
+            .font(.caption2)
+            .foregroundColor(.secondary)
+        }
       }
 
       Spacer()
 
-      Button("Delete") {
+      Button {
         onDelete()
+      } label: {
+        Image(systemName: "trash")
+          .foregroundColor(isCurrentDevice ? .orange : .red)
       }
-      .foregroundColor(.red)
+      .buttonStyle(.borderless)
     }
+    .padding(.vertical, 4)
   }
 }
 
