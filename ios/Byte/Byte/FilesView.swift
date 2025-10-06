@@ -7,37 +7,37 @@
 
 import ByteClient
 import Connect
+import PDFKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct FilesView: View {
   @EnvironmentObject var appState: AppState
-  @State private var entries: [Files_V1_FileInfo] = []
-  @State private var currentPath: String = "/"
-  @State private var isLoading = false
-  @State private var error: String?
+  @StateObject private var viewModel = FilesViewModel()
   @State private var showingCreateDirectory = false
   @State private var entryToDelete: Files_V1_FileInfo?
   @State private var showingDeleteConfirmation = false
+  @State private var showingFilePicker = false
+  @State private var selectedFileToView: Files_V1_FileInfo?
+  @State private var showingFileViewer = false
 
   var body: some View {
     NavigationView {
       List {
-        if isLoading {
+        if viewModel.isLoading {
           HStack {
             ProgressView()
             Text("Loading...")
           }
           .padding()
-        } else if entries.isEmpty {
+        } else if viewModel.entries.isEmpty {
           Text("Directory is empty")
             .foregroundColor(.secondary)
             .padding()
         } else {
-          ForEach(entries, id: \.path) { entry in
+          ForEach(viewModel.entries, id: \.path) { entry in
             FileRow(entry: entry) {
-              if entry.isDir {
-                navigateToDirectory(entry.path)
-              }
+              handleFileTap(entry)
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
               Button(role: .destructive) {
@@ -50,244 +50,155 @@ struct FilesView: View {
           }
         }
 
-        if let error = error {
+        if let error = viewModel.error {
           Section {
             Text(error)
               .foregroundColor(.red)
               .font(.caption)
           }
         }
+
+        if viewModel.isUploading {
+          Section(header: Text("Uploading")) {
+            ForEach(viewModel.uploadProgress.sorted(by: { $0.key < $1.key }), id: \.key) { filename, progress in
+              HStack {
+                Text(filename)
+                  .font(.caption)
+                Spacer()
+                ProgressView(value: progress)
+                  .frame(width: 100)
+                Text("\(Int(progress * 100))%")
+                  .font(.caption2)
+                  .foregroundColor(.secondary)
+              }
+            }
+          }
+        }
       }
-      .navigationTitle(currentPath)
+      .navigationTitle(viewModel.currentPath)
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
-          Button("New Folder") {
-            showingCreateDirectory = true
+          Menu {
+            Button {
+              showingCreateDirectory = true
+            } label: {
+              Label("New Folder", systemImage: "folder.badge.plus")
+            }
+
+            Button {
+              showingFilePicker = true
+            } label: {
+              Label("Upload File", systemImage: "arrow.up.doc")
+            }
+          } label: {
+            Image(systemName: "plus.circle")
           }
         }
 
         ToolbarItem(placement: .navigationBarLeading) {
-          if currentPath != "/" {
+          if viewModel.currentPath != "/" {
             Button("Back") {
-              navigateUp()
+              handleBackButton()
             }
           } else {
             Button("Refresh") {
-              loadDirectory()
+              handleRefresh()
             }
           }
         }
       }
       .sheet(isPresented: $showingCreateDirectory) {
-        CreateDirectoryView(currentPath: currentPath) { dirName in
-          createDirectory(name: dirName)
-          showingCreateDirectory = false
+        CreateDirectoryView(currentPath: viewModel.currentPath) { dirName in
+          handleCreateDirectory(dirName)
+        }
+      }
+      .sheet(isPresented: $showingFilePicker) {
+        DocumentPicker(currentPath: viewModel.currentPath) { urls in
+          handleFileUpload(urls)
+        }
+      }
+      .sheet(isPresented: $showingFileViewer) {
+        if let file = selectedFileToView, let data = viewModel.fileData {
+          FileViewer(file: file, data: data)
+        } else {
+          ProgressView("Loading file...")
         }
       }
       .onAppear {
-        loadDirectory()
+        handleOnAppear()
       }
-      .alert("Delete \(entryToDelete?.isDir == true ? "Directory" : "File")", isPresented: $showingDeleteConfirmation) {
+      .alert(
+        "Delete \(entryToDelete?.isDir == true ? "Directory" : "File")",
+        isPresented: $showingDeleteConfirmation
+      ) {
         Button("Cancel", role: .cancel) {
           entryToDelete = nil
         }
         Button("Delete", role: .destructive) {
-          if let entry = entryToDelete {
-            deleteEntry(entry)
-          }
-          entryToDelete = nil
+          handleDelete()
         }
       } message: {
         if let entry = entryToDelete {
-          if entry.isDir {
-            Text(
-              """
-              Are you sure you want to delete the directory "\(entry.name)" and all its contents? \
-              This action cannot be undone.
-              """
-            )
-          } else {
-            Text(
-              """
-              Are you sure you want to delete the file "\(entry.name)"? \
-              This action cannot be undone.
-              """
-            )
-          }
+          Text(deleteMessage(for: entry))
         }
       }
     }
   }
 
-  private func loadDirectory() {
+  private func handleFileTap(_ entry: Files_V1_FileInfo) {
     guard let client = appState.client else { return }
-
-    isLoading = true
-    error = nil
-
-    Task {
-      do {
-        var request = Files_V1_ListDirectoryRequest()
-        request.path = currentPath
-        let response = await client.files.listDirectory(request: request, headers: [:])
-
-        await MainActor.run {
-          if let message = response.message {
-            entries = message.entries
-          }
-          isLoading = false
-        }
-      } catch {
-        await MainActor.run {
-          self.error = error.localizedDescription
-          self.isLoading = false
-        }
-      }
-    }
-  }
-
-  private func navigateToDirectory(_ path: String) {
-    currentPath = path
-    loadDirectory()
-  }
-
-  private func navigateUp() {
-    let components = currentPath.split(separator: "/")
-    if components.isEmpty {
-      currentPath = "/"
+    if entry.isDir {
+      viewModel.navigateToDirectory(entry.path, client: client)
     } else {
-      currentPath = "/" + components.dropLast().joined(separator: "/")
-      if currentPath.isEmpty {
-        currentPath = "/"
-      }
+      selectedFileToView = entry
+      showingFileViewer = true
+      viewModel.downloadFile(entry, client: client)
     }
-    loadDirectory()
   }
 
-  private func createDirectory(name: String) {
+  private func handleBackButton() {
     guard let client = appState.client else { return }
-
-    Task {
-      do {
-        var request = Files_V1_MakeDirectoryRequest()
-        let newPath = currentPath == "/" ? "/\(name)" : "\(currentPath)/\(name)"
-        request.path = newPath
-        request.createParents = false
-        _ = await client.files.makeDirectory(request: request, headers: [:])
-
-        await MainActor.run {
-          loadDirectory()
-        }
-      } catch {
-        await MainActor.run {
-          self.error = error.localizedDescription
-        }
-      }
-    }
+    viewModel.navigateUp(client: client)
   }
 
-  private func deleteEntry(_ entry: Files_V1_FileInfo) {
+  private func handleRefresh() {
     guard let client = appState.client else { return }
-
-    Task {
-      do {
-        var request = Files_V1_DeleteFileRequest()
-        request.path = entry.path
-        request.recursive = entry.isDir
-
-        _ = await client.files.deleteFile(request: request, headers: [:])
-
-        await MainActor.run {
-          entries.removeAll { $0.path == entry.path }
-        }
-      } catch {
-        await MainActor.run {
-          self.error = error.localizedDescription
-        }
-      }
-    }
-  }
-}
-
-struct FileRow: View {
-  let entry: Files_V1_FileInfo
-  let onTap: () -> Void
-
-  var body: some View {
-    Button(action: onTap) {
-      HStack {
-        Image(systemName: entry.isDir ? "folder.fill" : "doc.fill")
-          .foregroundColor(entry.isDir ? .blue : .gray)
-
-        VStack(alignment: .leading) {
-          Text(entry.name)
-            .font(.headline)
-            .foregroundColor(.primary)
-
-          if !entry.isDir {
-            Text("Size: \(formatBytes(entry.size))")
-              .font(.caption)
-              .foregroundColor(.secondary)
-          }
-        }
-
-        Spacer()
-
-        if entry.isDir {
-          Image(systemName: "chevron.right")
-            .foregroundColor(.secondary)
-        }
-      }
-    }
+    viewModel.loadDirectory(client: client)
   }
 
-  private func formatBytes(_ bytes: Int64) -> String {
-    let formatter = ByteCountFormatter()
-    formatter.countStyle = .file
-    return formatter.string(fromByteCount: bytes)
+  private func handleCreateDirectory(_ name: String) {
+    guard let client = appState.client else { return }
+    viewModel.createDirectory(name: name, client: client)
+    showingCreateDirectory = false
   }
-}
 
-struct CreateDirectoryView: View {
-  let currentPath: String
-  @State private var directoryName = ""
-  let onCreate: (String) -> Void
-  @Environment(\.dismiss)
-  private var dismiss
+  private func handleFileUpload(_ urls: [URL]) {
+    guard let client = appState.client else { return }
+    viewModel.uploadFiles(urls, client: client)
+  }
 
-  var body: some View {
-    NavigationView {
-      Form {
-        Section(header: Text("Directory Information")) {
-          TextField("Directory Name", text: $directoryName)
+  private func handleDelete() {
+    guard let client = appState.client, let entry = entryToDelete else { return }
+    viewModel.deleteEntry(entry, client: client)
+    entryToDelete = nil
+  }
 
-          Text(
-            """
-            Will be created at: \(currentPath == "/" ? "/" : currentPath)/\
-            \(directoryName.isEmpty ? "<name>" : directoryName)
-            """
-          )
-          .font(.caption)
-          .foregroundColor(.secondary)
-        }
-      }
-      .navigationTitle("Create Directory")
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        ToolbarItem(placement: .navigationBarLeading) {
-          Button("Cancel") {
-            dismiss()
-          }
-        }
+  private func handleOnAppear() {
+    guard let client = appState.client else { return }
+    viewModel.loadDirectory(client: client)
+  }
 
-        ToolbarItem(placement: .navigationBarTrailing) {
-          Button("Create") {
-            onCreate(directoryName)
-            dismiss()
-          }
-          .disabled(directoryName.isEmpty)
-        }
-      }
+  private func deleteMessage(for entry: Files_V1_FileInfo) -> String {
+    if entry.isDir {
+      return """
+        Are you sure you want to delete the directory "\(entry.name)" and all its contents? \
+        This action cannot be undone.
+        """
+    } else {
+      return """
+        Are you sure you want to delete the file "\(entry.name)"? \
+        This action cannot be undone.
+        """
     }
   }
 }
