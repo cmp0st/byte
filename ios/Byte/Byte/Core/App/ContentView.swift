@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// Root content view that manages app state
 struct ContentView: View {
   @StateObject private var appState = AppState()
 
@@ -19,8 +20,11 @@ struct ContentView: View {
       }
     }
     .environmentObject(appState)
+    .accessibilityElement(children: .contain)
   }
 }
+
+// MARK: - Preview
 
 #Preview {
   ContentView()

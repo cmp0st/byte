@@ -1,0 +1,70 @@
+name: iOS CI
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-ci.yml'
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_15.2.app/Contents/Developer
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-14
+    needs: lint
+    strategy:
+      matrix:
+        destination: ['platform=iOS Simulator,name=iPhone 15 Pro,OS=17.2']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Cache SPM dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ios/Byte/Byte.xcodeproj/project.xcworkspace/xcshareddata/swiftpm
+            ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Resolve Swift Package dependencies
+        run: xcodebuild -resolvePackageDependencies -project ios/Byte/Byte.xcodeproj -scheme Byte
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project ios/Byte/Byte.xcodeproj \
+            -scheme Byte \
+            -destination '${{ matrix.destination }}' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -project ios/Byte/Byte.xcodeproj \
+            -scheme Byte \
+            -destination '${{ matrix.destination }}' \
+            -enableCodeCoverage YES \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO

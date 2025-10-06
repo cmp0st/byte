@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// Main app entry point
 @main
 struct ByteApp: App {
   var body: some Scene {

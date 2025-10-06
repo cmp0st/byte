@@ -10,17 +10,26 @@ import Combine
 import Connect
 import Foundation
 
+/// ViewModel for file browsing and management
 @MainActor
-class FilesViewModel: ObservableObject {
-  @Published var entries: [Files_V1_FileInfo] = []
-  @Published var currentPath: String = "/"
-  @Published var isLoading = false
-  @Published var error: String?
-  @Published var uploadProgress: [String: Double] = [:]
-  @Published var isUploading = false
-  @Published var fileData: Data?
-  @Published var isDownloading = false
+final class FilesViewModel: ObservableObject {
+  // MARK: - Published Properties
 
+  @Published private(set) var entries: [Files_V1_FileInfo] = []
+  @Published private(set) var currentPath: String = AppConstants.Files.rootPath
+  @Published private(set) var isLoading = false
+  @Published private(set) var error: String?
+  @Published private(set) var uploadProgress: [String: Double] = [:]
+  @Published private(set) var isUploading = false
+  @Published private(set) var fileData: Data?
+  @Published private(set) var isDownloading = false
+
+  // MARK: - Public Methods
+
+  /// Load directory contents
+  /// - Parameters:
+  ///   - client: The ByteClient instance
+  ///   - clearError: Whether to clear existing errors
   func loadDirectory(client: ByteClient, clearError: Bool = true) {
     isLoading = true
     if clearError {
@@ -44,40 +53,54 @@ class FilesViewModel: ObservableObject {
     }
   }
 
+  /// Navigate to a specific directory
+  /// - Parameters:
+  ///   - path: The path to navigate to
+  ///   - client: The ByteClient instance
   func navigateToDirectory(_ path: String, client: ByteClient) {
     currentPath = path
     loadDirectory(client: client)
   }
 
+  /// Navigate up one directory level
+  /// - Parameter client: The ByteClient instance
   func navigateUp(client: ByteClient) {
     let components = currentPath.split(separator: "/")
     if components.isEmpty {
-      currentPath = "/"
+      currentPath = AppConstants.Files.rootPath
     } else {
       currentPath = "/" + components.dropLast().joined(separator: "/")
       if currentPath.isEmpty {
-        currentPath = "/"
+        currentPath = AppConstants.Files.rootPath
       }
     }
     loadDirectory(client: client)
   }
 
+  /// Create a new directory
+  /// - Parameters:
+  ///   - name: The directory name
+  ///   - client: The ByteClient instance
   func createDirectory(name: String, client: ByteClient) {
     Task {
       do {
         var request = Files_V1_MakeDirectoryRequest()
-        let newPath = currentPath == "/" ? "/\(name)" : "\(currentPath)/\(name)"
+        let newPath = buildPath(for: name)
         request.path = newPath
         request.createParents = false
         _ = await client.files.makeDirectory(request: request, headers: [:])
 
         loadDirectory(client: client)
       } catch {
-        self.error = error.localizedDescription
+        self.error = AppError.fileOperationFailed("create directory").localizedDescription
       }
     }
   }
 
+  /// Delete a file or directory
+  /// - Parameters:
+  ///   - entry: The file info to delete
+  ///   - client: The ByteClient instance
   func deleteEntry(_ entry: Files_V1_FileInfo, client: ByteClient) {
     Task {
       do {
@@ -89,11 +112,15 @@ class FilesViewModel: ObservableObject {
 
         entries.removeAll { $0.path == entry.path }
       } catch {
-        self.error = error.localizedDescription
+        self.error = AppError.fileOperationFailed("delete").localizedDescription
       }
     }
   }
 
+  /// Download a file
+  /// - Parameters:
+  ///   - file: The file to download
+  ///   - client: The ByteClient instance
   func downloadFile(_ file: Files_V1_FileInfo, client: ByteClient) {
     isDownloading = true
     fileData = nil
@@ -120,6 +147,10 @@ class FilesViewModel: ObservableObject {
     }
   }
 
+  /// Upload multiple files
+  /// - Parameters:
+  ///   - urls: The file URLs to upload
+  ///   - client: The ByteClient instance
   func uploadFiles(_ urls: [URL], client: ByteClient) {
     isUploading = true
     error = nil
@@ -134,19 +165,18 @@ class FilesViewModel: ObservableObject {
     }
   }
 
+  // MARK: - Private Methods
+
   private func uploadSingleFile(_ url: URL, client: ByteClient) async {
     let filename = url.lastPathComponent
 
     do {
-      // Since asCopy: true, files are already copied to temporary location
-      // No need for security-scoped resource access
       let fileData = try Data(contentsOf: url)
 
       uploadProgress[filename] = 0.1
 
-      // Upload to server
       var request = Files_V1_WriteFileRequest()
-      let uploadPath = currentPath == "/" ? "/\(filename)" : "\(currentPath)/\(filename)"
+      let uploadPath = buildPath(for: filename)
       request.path = uploadPath
       request.data = fileData
       request.createParents = false
@@ -155,20 +185,26 @@ class FilesViewModel: ObservableObject {
 
       let response = await client.files.writeFile(request: request, headers: [:])
 
-      // Check for errors
       if let error = response.error {
         throw error
       }
 
       uploadProgress[filename] = 1.0
 
-      // Small delay to show completion
-      try await Task.sleep(nanoseconds: 500_000_000)
+      try await Task.sleep(nanoseconds: AppConstants.Animation.uploadCompletionDelay)
 
       uploadProgress.removeValue(forKey: filename)
     } catch {
       self.error = "Failed to upload \(filename): \(error.localizedDescription)"
       uploadProgress.removeValue(forKey: filename)
+    }
+  }
+
+  private func buildPath(for filename: String) -> String {
+    if currentPath == AppConstants.Files.rootPath {
+      return "/\(filename)"
+    } else {
+      return "\(currentPath)/\(filename)"
     }
   }
 }
