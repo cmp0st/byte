@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   golangci:
-    name: lint
+    name: Go Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -22,3 +22,34 @@ jobs:
         uses: golangci/golangci-lint-action@v8
         with:
           version: v2.4
+
+  swiftlint:
+    name: Swift Lint
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run SwiftLint
+        run: swiftlint lint --strict --reporter github-actions-logging
+
+  swift-format:
+    name: Swift Format
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install swift-format
+        run: brew install swift-format
+
+      - name: Check Swift formatting
+        run: |
+          # Check all Swift files in ios and swift directories
+          find ios swift -name "*.swift" \
+            -not -path "*/Generated/*" \
+            -not -path "*/GeneratedMocks/*" \
+            -not -path "*/.build/*" \
+            -not -path "*/Pods/*" \
+            -print0 | xargs -0 swift-format lint --strict --parallel
