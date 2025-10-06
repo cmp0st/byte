@@ -16,6 +16,8 @@ struct FilesView: View {
   @State private var isLoading = false
   @State private var error: String?
   @State private var showingCreateDirectory = false
+  @State private var entryToDelete: Files_V1_FileInfo?
+  @State private var showingDeleteConfirmation = false
 
   var body: some View {
     NavigationView {
@@ -35,6 +37,14 @@ struct FilesView: View {
             FileRow(entry: entry) {
               if entry.isDir {
                 navigateToDirectory(entry.path)
+              }
+            }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+              Button(role: .destructive) {
+                entryToDelete = entry
+                showingDeleteConfirmation = true
+              } label: {
+                Label("Delete", systemImage: "trash")
               }
             }
           }
@@ -76,6 +86,35 @@ struct FilesView: View {
       }
       .onAppear {
         loadDirectory()
+      }
+      .alert("Delete \(entryToDelete?.isDir == true ? "Directory" : "File")", isPresented: $showingDeleteConfirmation) {
+        Button("Cancel", role: .cancel) {
+          entryToDelete = nil
+        }
+        Button("Delete", role: .destructive) {
+          if let entry = entryToDelete {
+            deleteEntry(entry)
+          }
+          entryToDelete = nil
+        }
+      } message: {
+        if let entry = entryToDelete {
+          if entry.isDir {
+            Text(
+              """
+              Are you sure you want to delete the directory "\(entry.name)" and all its contents? \
+              This action cannot be undone.
+              """
+            )
+          } else {
+            Text(
+              """
+              Are you sure you want to delete the file "\(entry.name)"? \
+              This action cannot be undone.
+              """
+            )
+          }
+        }
       }
     }
   }
@@ -138,6 +177,28 @@ struct FilesView: View {
 
         await MainActor.run {
           loadDirectory()
+        }
+      } catch {
+        await MainActor.run {
+          self.error = error.localizedDescription
+        }
+      }
+    }
+  }
+
+  private func deleteEntry(_ entry: Files_V1_FileInfo) {
+    guard let client = appState.client else { return }
+
+    Task {
+      do {
+        var request = Files_V1_DeleteFileRequest()
+        request.path = entry.path
+        request.recursive = entry.isDir
+
+        _ = await client.files.deleteFile(request: request, headers: [:])
+
+        await MainActor.run {
+          entries.removeAll { $0.path == entry.path }
         }
       } catch {
         await MainActor.run {
