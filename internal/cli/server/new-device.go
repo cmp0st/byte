@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -9,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/cmp0st/byte/internal/config"
+	"github.com/cmp0st/byte/internal/database"
 	"github.com/cmp0st/byte/internal/key"
 	"github.com/google/uuid"
 	qrcode "github.com/skip2/go-qrcode"
@@ -45,6 +47,26 @@ func newDevice(cmd *cobra.Command, args []string) error {
 	}
 
 	deviceID, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+
+	var db *database.DB
+	{
+		sqlitedb, err := sql.Open("sqlite", conf.Database)
+		if err != nil {
+			return fmt.Errorf("failed to open database: %w", err)
+		}
+
+		db = &database.DB{DB: sqlitedb}
+	}
+
+	err = db.Migrate()
+	if err != nil {
+		return err
+	}
+
+	err = db.AddDevice(cmd.Context(), deviceID.String())
 	if err != nil {
 		return err
 	}
