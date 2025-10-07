@@ -21,6 +21,7 @@ struct SettingsView: View {
     NavigationView {
       List {
         configurationSection
+        photoSyncSection
         actionsSection
       }
       .navigationTitle("Settings")
@@ -57,6 +58,35 @@ struct SettingsView: View {
     }
     .accessibilityElement(children: .combine)
     .accessibilityLabel("\(title): \(value)")
+  }
+
+  private var photoSyncSection: some View {
+    Section(header: Text("Photo Sync")) {
+      Toggle("Auto-Sync Photos", isOn: Binding(
+        get: { PhotoSyncService.shared.autoSyncEnabled },
+        set: { PhotoSyncService.shared.autoSyncEnabled = $0 }
+      ))
+      .accessibilityLabel("Auto-sync photos")
+      .accessibilityHint("Automatically upload new photos when they are added to your library")
+
+      if let lastSync = PhotoSyncService.shared.lastSyncTime {
+        HStack {
+          Text("Last Sync")
+          Spacer()
+          Text(lastSync, style: .relative)
+            .foregroundColor(.secondary)
+            .font(.caption)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Last sync: \(lastSync, style: .relative)")
+      }
+
+      Button("Clear Sync History") {
+        PhotoSyncService.shared.clearSyncState()
+      }
+      .accessibilityLabel("Clear sync history")
+      .accessibilityHint("Removes record of previously synced photos")
+    }
   }
 
   private var actionsSection: some View {

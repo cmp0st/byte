@@ -108,6 +108,9 @@ final class PhotosSyncViewModel: ObservableObject {
         uploadProgress[asset.localIdentifier] = 1.0
         successCount += 1
         selectedPhotos.remove(asset.localIdentifier)
+
+        // Mark photo as synced in the service
+        PhotoSyncService.shared.markPhotoAsSynced(asset.localIdentifier)
       } catch {
         errorMessage = "Failed to sync photo: \(error.localizedDescription)"
       }

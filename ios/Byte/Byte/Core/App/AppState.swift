@@ -41,6 +41,7 @@ final class AppState: ObservableObject, AppStateProtocol {
       let secret = keychainService.loadString(for: AppConstants.Keychain.Keys.secret)
     else {
       isConfigured = false
+      PhotoSyncService.shared.setClient(nil)
       return
     }
 
@@ -56,9 +57,11 @@ final class AppState: ObservableObject, AppStateProtocol {
       self.configuration = config
       self.isConfigured = true
       self.error = nil
+      PhotoSyncService.shared.setClient(client)
     } catch {
       self.error = error.localizedDescription
       self.isConfigured = false
+      PhotoSyncService.shared.setClient(nil)
     }
   }
 
@@ -92,10 +95,13 @@ final class AppState: ObservableObject, AppStateProtocol {
       self.client = client
       self.configuration = config
       self.isConfigured = true
+      PhotoSyncService.shared.setClient(client)
     } catch let appError as AppError {
       self.error = appError.localizedDescription
+      PhotoSyncService.shared.setClient(nil)
     } catch {
       self.error = error.localizedDescription
+      PhotoSyncService.shared.setClient(nil)
     }
 
     isLoading = false
@@ -110,5 +116,6 @@ final class AppState: ObservableObject, AppStateProtocol {
     configuration = nil
     isConfigured = false
     error = nil
+    PhotoSyncService.shared.setClient(nil)
   }
 }
